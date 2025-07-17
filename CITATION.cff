@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it using the following metadata."
+title: "Impact of light logger and dosimeter placement on wearability and appeal in real-life settings"
+authors:
+  - family-names: Zauner
+    given-names: Johannes
+    orcid: https://orcid.org/0009-0008-9064-4972
+  - family-names: Biller
+    given-names: Anna M.
+    orcid: https://orcid.org/0000-0002-2683-8130
+  - family-names: Spitschan
+    given-names: Manuel
+    orcid: https://orcid.org/0000-0002-8572-9268
+date-released: 2025-07-17
+version: "1.0.0"
+type: dataset
+doi: 10.5281/zenodo.16050404
+url: https://doi.org/10.5281/zenodo.16050404
+license: CC-BY-4.0
+keywords:
+  - light exposure
+  - dosimetry
+  - wearables
+  - human factors
+  - optical radiation
