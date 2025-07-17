@@ -1,0 +1,1105 @@
+---
+title: "Survey: Light logger form factor and placement"
+authors: "Johannes Zauner, Anna Biller, Manuel Spitschan"
+format: 
+  html:
+    code-fold: true
+    embed-resources: true
+    code-tools: true
+    toc: true
+---
+
+## Preface
+
+This is the analysis for an online survey to gather information about the acceptability of form factor and placements of light loggers. The survey was conducted using Prolific on three days in 2023, each collecting from a different sample (USA, UK, Worldwide).
+
+**This is the second part of the analysis, focusing on inference.**
+
+## Import
+
+We will start off by importing the data and setting factor levels.
+
+```{r, import}
+#| output: false
+
+#Load Hmisc library
+library(Hmisc)
+library(tidyverse)
+library(gtsummary)
+library(gt)
+library(ggtext)
+library(rlang)
+library(patchwork)
+library(ordinal)
+library(rlang)
+library(glue)
+library(broom)
+library(ggridges)
+
+#Read Data in the long format
+load(file = "data/cleaned/LightLoggerFormFacto_Long_CLEANED_DATA_2024-07-02.RData")
+```
+
+## Inferential statistics
+
+The base hypothesis is that the ratings depend on the `Wearing Position`, with `Sex` and `Sample` as control variables. Further, the effect of the `Wearing Position` might be dependent on `Sex`.
+
+The inferential analysis fits cumulative link mixed models (CLMM) to the data. The models are fitted using the `ordinal` package. The models are fitted for each rating separately. The base model is fitted with the following formula:
+
+`CLMM`: $E(logit(y)) = \alpha_0 + \beta_{i1} * WearingPosition + \beta_{i2} * Sex + \beta_{i3} * WearingPosition*Sex + \beta_{i4} * Sample + \alpha_j$
+
+Where $E(logit(y))$ is the expected value of the rating on a logit scale, $\alpha_0$ is the intercept, $\beta_{i1}$ is the effect size of `Wearing Position`, $\beta_{i2}$ is the effect size of `Sex`, $\beta_{i3}$ is the interaction effect size of `Wearing Position` and `Sex`, $\beta_{i4}$ is the effect size of `Sample`, and $\alpha_j$ is the random intercept for each participant.
+
+or in Wilkinson notation:
+
+$Rating \sim WearingPosition*Sex + Sample + (1|Id)$ (m1)
+
+Models are compared through likelihood ratio tests. The following models are used for comparison:
+
+A model without the interaction of `Wearing Position` and `Sex` (m2), a model without `Sex` (m3), a model without `Sample` (m4), a model with only `Wearing Position` (m5), and a null model, with only random effects (m0).
+
+-   $Rating \sim WearingPosition + Sex + Sample + (1|Id)$ (m2)
+
+-   $Rating \sim WearingPosition + Sample + (1|Id)$ (m3)
+
+-   $Rating \sim WearingPosition*Sex + (1|Id)$ (m4)
+
+-   $Rating \sim WearingPosition + (1|Id)$ (m5)
+
+-   $Rating \sim 1 + (1|Id)$ (m0)
+
+The following comparisons are made: 1. Interaction of `Sex` and `Wearing Position` (m1 vs. m2) 2. Inclusion of `Sex` (m2 vs. m3) 3. Inclusion of `Sample` (m1 vs. m4) 4. Inclusion of `Wearing Position` (m5 vs. m0)
+
+The p-values are adjusted using the Benjamini & Hochberg (1995) method, also called the false discovery rate (fdr) with an `n=4` for four comparisons.
+
+### Setup
+
+```{r, general setup}
+#convert some variables to factor
+data_long$sample_location <- as.factor(data_long$sample_location)
+data_long$record_id <- as.factor(data_long$record_id)
+
+#function generation
+Infe <- function(parameter, data) {
+  parameter <- enexpr(parameter)
+  
+  #formula generation
+  formulas <- inject(c(
+    #full formula
+    m1 = !!parameter ~ wearing_position*demographics_sex + sample_location + (1|record_id),
+    #excluding interaction from m1
+    m2 = !!parameter ~ wearing_position + demographics_sex + sample_location + (1|record_id),
+    #further excluding sex from m2
+    m3 = !!parameter ~ wearing_position + sample_location + (1|record_id),
+    #excluding sample location from m1
+    m4 = !!parameter ~ wearing_position*demographics_sex + (1|record_id),
+    #excluding sample location from m3
+    m5 = !!parameter ~ wearing_position + (1|record_id),
+    #Null model
+    m0 = !!parameter ~ 1 + (1|record_id)
+  ))
+  
+  #Model generation
+  Infe_table <- tibble(
+    name = names(formulas),
+    formula = formulas,
+    model = map(name, \(x) {switch(x,
+                                        m1 = ,
+                                        m2 = ,
+                                        m3 = ,
+                                        m4 =
+                                         clmm(formulas[[x]], data = data, nAGQ = 10,
+                                              subset =
+                                                demographics_sex != "Other"),
+                                        m5 = ,
+                                        m0 = clmm(formulas[[x]], data = data, nAGQ = 10)
+                                       ) 
+    }
+    )
+  )
+  
+  Infe_table
+}
+
+# Function to perform anova on model pairs
+anova_models <- function(pair) {
+  one <- pair[[1]]
+  two <- pair[[2]]
+  inject(anova(Models$model[[!!one]], Models$model[[!!two]]))
+}
+
+#function to perform the model comparisons
+Model_Comparisons <- function(Models) {
+  # Define the model comparisons
+model_comparisons <- list(
+  c(1, 2),
+  c(2, 3),
+  c(1, 4),
+  c(5, 6)
+)
+
+tibble(
+  desc = c("interaction of sex and wearing position",
+           "inclusion of sex",
+           "inclusion of sample location",
+           "inclusion of wearing position"),
+  p.value = map(model_comparisons, 
+                   \(x) anova_models(x) %>% .$`Pr(>Chisq)` %>% .[[2]]
+                   ) %>% unlist() %>% p.adjust(method = "fdr", n = 4) %>% 
+                    {case_when(
+                     . < 0.001 ~ "<0.001",
+                     TRUE ~ as.character(round(., 3))
+                   )}
+    
+)
+}
+
+#probability of different answers
+#setting up a function
+pred <- function(eta, theta, levels, cat = 1:(length(theta)+1), inv.link = plogis) {
+   Theta <- c(-Inf, theta, Inf)
+   eta <- c(reference = 0, eta)
+   table <- 
+   sapply(cat, function(j)
+          inv.link(Theta[j+1] - eta) - inv.link(Theta[j] - eta) ) 
+   colnames(table) <- levels
+   table
+}
+
+data_significance_matrix <- function(Model, subset = "none") {
+  Models <- tibble(
+  reference = levels(data_long$wearing_position),
+  data = map(reference, 
+             \(x) data_long %>% mutate(wearing_position = 
+                                         fct_relevel(wearing_position, x))
+             ),
+  model = map(data, 
+              \(x) switch(subset,
+                          none = clmm(Model$formula, data = x, nAGQ = 10),
+                          clmm(Model$formula, data = x, nAGQ = 10,
+                               subset = demographics_sex != "Other")
+                          )
+              ),
+  tidy = map(model, 
+             \(x) tidy(x) %>% 
+               filter(str_detect(term, "wearing_position")) %>% 
+               select(term, p.value) %>% 
+               mutate(term = str_remove(term, "wearing_position"))
+             )
+  )
+
+Models %>% 
+  select(-data, -model) %>% 
+  unnest(tidy) %>% 
+  rowwise() %>% 
+  mutate(
+    p.value = p.adjust(p.value, method = "fdr", n = 7),
+    different = p.value <= 0.05) %>%
+  ungroup() %>% 
+  rbind(
+    tibble(reference = levels(data_long$wearing_position),
+           term = reference,
+           p.value = NA,
+           different = FALSE))
+}
+
+#McFadden´s Pseudo R2, values between 0.2 bis 0.4 are an excellent model fit
+McFadden <- function(model, nullmodel) {
+  ll.null <- nullmodel$logLik
+  ll.proposed <- model$logLik
+  1 - ll.proposed/ll.null
+}
+
+#Formula to plot the significance matrix
+Significance_matrix <- function(sig_matrix, sex = FALSE){
+  sig_matrix %>% 
+  mutate(
+    across(c(reference, term), \(x) fct_relevel(x, levels(data_long$wearing_position)))) %>%
+  ggplot(aes(x=reference, y = term, fill = different)) +
+  geom_tile(col = "grey30") + 
+  scale_fill_manual(values = c("white", "skyblue4"))+
+  coord_fixed() +
+  theme_void() +
+  labs(title = label(data_long[parameter]),
+       subtitle = case_when(!sex ~ "<span style='color:skyblue4'>Significant differences</span> due to wearing position",
+                            sex ~ "Significant differences due to <span style='color:skyblue4'>wearing position</span> and <span style='color:red'>sex</span>" )
+       )+
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        axis.text.y = element_text(hjust = 1),
+        plot.title = 
+          element_textbox_simple(
+            hjust = 0,
+            padding = margin(0.5, 0, 0.5, 0, "cm")),
+        plot.subtitle = element_textbox_simple(),
+        plot.title.position = "plot",
+        )
+}
+
+#table of probabilities
+prob_table <- function(beta, title){
+pred(beta, Model$Theta, 
+     levels = levels(data_long[[parameter]])) %>% 
+  as_tibble(rownames = "Wearing Position") %>%
+  mutate(`Wearing Position` = 
+           str_remove(`Wearing Position`, "wearing_position"),
+         `Wearing Position` = str_replace(`Wearing Position`, "reference", "Chest Pin")
+           ) %>%
+  gt() %>% fmt_percent() %>% 
+  gt::tab_caption(md(glue(title)))
+}
+
+```
+
+::: panel-tabset
+### Appearance
+
+#### Model selection
+
+```{r, appearance model selection}
+parameter <- "appearance"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The only parameter which is supported by the data is `Wearing Position`. `Sex`, its interaction with `Wearing Position`, and `Sample` are not supported by the data. The resulting model `m5` is used for the following analysis.
+
+#### Significant differences
+
+```{r appearance differences}
+#final model
+chosen_model <- "m5"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model)
+
+P1 <- Significance_matrix(sig_matrix)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P1, width = 4, height = 4.6)
+
+P1
+
+```
+
+#### Predicted probabilities
+
+```{r appearance predictions}
+#if one wanted to print predictions for different subject percentiles
+stDev <-  as.numeric(attr(VarCorr(Model)$record_id, "stddev"))^2
+# 5th percentile:
+prob_table(Model$beta * qnorm(0.05) * stDev, 
+           "Predicted probabilities for the **5th percentile** for **{parameter}**")
+#average:
+prob_table(Model$beta, 
+           "Predicted probabilities for the **average person** for **{parameter}**")
+# 95th percentile:
+prob_table(Model$beta * qnorm(0.95) * stDev, 
+           "Predicted probabilities for the **95th percentile** for **{parameter}**")
+
+```
+
+#### Model diagnostics
+
+```{r, appearance diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+for(i in 1:145) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Wearlikelihood context
+
+This sections analyses how the context of wear influences the ratings, dependent on the wearing position
+
+```{r, wearlikelihood context}
+#function to remove labels. This is necessary for pivot_longer to work
+clear.labels <- function(x) {
+  if(is.list(x)) {
+    for(i in seq_along(x)) {
+      class(x[[i]]) <- setdiff(class(x[[i]]), 'labelled') 
+      attr(x[[i]],"label") <- NULL
+    } 
+  } else {
+    class(x) <- setdiff(class(x), "labelled")
+    attr(x, "label") <- NULL
+  }
+  return(x)
+}
+
+#pivoting the data even longer to get the context into the observation
+data_long2 <- data_long %>% 
+  select(record_id,
+         demographics_sex,
+         wearing_position,
+         starts_with("wearlikelihoodrating")
+  ) %>% 
+  clear.labels() %>% 
+  pivot_longer(-c(record_id, demographics_sex, wearing_position), 
+               names_to = "context", 
+               values_to = "rating") %>% 
+  mutate(context = 
+           str_remove(context, "wearlikelihoodrating_") %>% 
+           factor() %>% 
+           fct_reorder(as.numeric(rating), .desc = TRUE, .fun = mean)
+           # fct_relevel(c("public", "work", "home", "social", "exercise")
+           )
+
+#model generation
+Model <- clmm(rating ~ context*wearing_position + (1|record_id), data = data_long2, nAGQ = 10)
+Model2 <- clmm(rating ~ context+wearing_position + (1|record_id), data = data_long2, nAGQ = 10)
+Model3 <- clmm(rating ~ context + (1|record_id), data = data_long2, nAGQ = 10)
+Model4 <- clmm(rating ~ wearing_position + (1|record_id), data = data_long2, nAGQ = 10)
+Model0 <- clmm(rating ~ 1 + (1|record_id), data = data_long2, nAGQ = 10)
+
+#model selection
+anova(Model, Model2)
+anova(Model2, Model3)
+anova(Model3, Model0)
+anova(Model4, Model0)
+
+#model summaries
+summary(Model)
+summary(Model3)
+summary(Model4)
+
+#get the predicted probabilities depending on context, save as a table
+context_preds <- pred(Model3$beta, Model3$Theta, 
+     levels = levels(data_long2$rating)) %>% 
+  as_tibble(rownames = "Parameters") %>%
+  mutate(`Parameters` = 
+           str_remove(`Parameters`, "wearing_position|context"),
+         `Parameters` = str_replace(`Parameters`, "reference", "home")
+           )
+
+context_preds_table <- 
+context_preds %>% 
+  gt() %>% 
+  fmt_percent(decimals = 0) %>% 
+  gt::tab_caption(md("Likelihood of wear ratings depending on context")) %>% 
+  gt::data_color(columns = -Parameters, method = "numeric", 
+                 colors = scales::col_numeric(palette = "viridis", 
+                                              domain = c(0,0.30))
+                 ) %>% 
+  cols_width(everything() ~ px(100))
+
+context_preds_table
+gtsave(context_preds_table, "output/02_tables/table_2_context.png")
+
+#get the predicted probabilities depending on wearing_position, save as a table
+context_preds <- pred(Model4$beta, Model4$Theta, 
+     levels = levels(data_long2$rating)) %>% 
+  as_tibble(rownames = "Parameters") %>%
+  mutate(`Parameters` = 
+           str_remove(`Parameters`, "wearing_position|context"),
+         `Parameters` = str_replace(`Parameters`, "reference", "Chest pin")
+           )
+
+context_preds_table <- 
+context_preds %>% 
+  gt() %>% 
+  fmt_percent(decimals = 0) %>% 
+  gt::tab_caption(md("Likelihood of wear ratings depending on wearing position")) %>% 
+  gt::data_color(columns = -Parameters, method = "numeric", 
+                 colors = scales::col_numeric(palette = "viridis", 
+                                              domain = c(0,0.39))
+                 ) %>% 
+  cols_width(everything() ~ px(100))
+
+context_preds_table
+gtsave(context_preds_table, "output/02_tables/table_3_wearing_position.png")
+
+#create a table of the interaction model
+#first, collect all the beta coefficients for the context
+coefs_context <- 
+  Model$beta %>% 
+  as_tibble(rownames = "Parameters") %>% 
+  filter(str_detect(Parameters, "context"),
+         !str_detect(Parameters, "wearing_position")) %>% 
+  rename(Context = Parameters,
+         beta1 = value) %>% 
+  add_row(Context = "contexthome", beta1 = 0, .before = 1)
+
+#second, collect all the beta coefficients for the wearing position
+coefs_position <- 
+  Model$beta %>% 
+  as_tibble(rownames = "Parameters") %>% 
+  filter(str_detect(Parameters, "wearing_position"),
+         !str_detect(Parameters, "context")) %>% 
+    rename(Position2 = Parameters,
+         beta2 = value) %>% 
+  add_row(Position2 = "wearing_positionChest pin", beta2 = 0, .before = 1)
+
+#third, collect all the beta coefficients for the interaction
+coefs_extra <- 
+  Model$beta %>% 
+  as_tibble(rownames = "Parameters") %>% 
+  filter(str_detect(Parameters, "wearing_position")) %>% 
+  rename(Position = Parameters,
+         beta3 = value) %>% 
+  add_row(Position = "contextpublic:wearing_positionChest pin", beta3 = 0, .before = 2) %>%
+  add_row(Position = "contextexercise:wearing_positionChest pin", beta3 = 0, .before = 3) %>%
+  add_row(Position = "contextwork:wearing_positionChest pin", beta3 = 0, .before = 4) %>%
+  add_row(Position = "contextsocial:wearing_positionChest pin", beta3 = 0, .before = 5) %>%
+  mutate(Position = 
+           str_replace(
+             Position, "^wearing_position", "contexthome:wearing_position")
+         )
+
+#combine the three tables to a single table and filter out non-relevant combinations
+coefs_combined <- 
+expand_grid(coefs_context, coefs_position, coefs_extra) %>% 
+  filter(str_detect(Position, Context),
+         str_detect(Position, Position2)) %>% 
+  mutate(Context = str_remove(Context, "context"), 
+         Position = str_remove(Position, "(.*):wearing_position"),
+         beta3 = ifelse(str_detect(Context , "home"), 0, beta3))
+
+coefs_combined <- 
+  set_names(coefs_combined$beta1+coefs_combined$beta2 + coefs_combined$beta3, 
+            paste(coefs_combined$Context, coefs_combined$Position, sep = ":"))
+
+#create and save a table of the predicted rating
+combined_pred <- 
+pred(coefs_combined, Model$Theta, 
+     levels = levels(data_long2$rating)
+     ) %>% 
+  as_tibble(rownames = "Parameters") %>%
+  mutate(
+         `Parameters` = str_replace(`Parameters`, "reference", "home:Chest pin")
+  ) %>% 
+  separate_wider_delim(Parameters, ":", names = c("Context", "Position")) %>% 
+  pivot_longer(cols = -c(Context, Position), names_to = "Rating", values_to = "Probability") %>% 
+  mutate(Rating = factor(Rating, levels = levels(data_long2$rating))) %>% 
+  group_by(Context, Position) %>% 
+  summarize(Probability = Rating[which.max(Probability)], .groups = "drop") %>% 
+  pivot_wider(names_from = Position, values_from = Probability) %>% 
+  arrange(factor(Context, levels = levels(data_long2$context))) %>% 
+  select(Context, all_of(levels(data_long2$wearing_position))) %>% 
+  gt() %>% 
+  gt::tab_caption(md("*Likelihood of wear* rating prediction depending on **context** and **wearing position**")) %>% 
+  gt::data_color(columns = -Context, ordered = TRUE,
+                 palette = "viridis"
+                 ) %>% 
+  cols_width(everything() ~ px(100))
+
+combined_pred
+gtsave(combined_pred, "output/02_tables/table_4_context_position.png")
+
+
+```
+
+
+### Wearlikelihood public
+
+#### Model selection
+
+```{r, public selection}
+parameter <- "wearlikelihoodrating_public"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The only parameter which is supported by the data is `Wearing Position`. `Sex`, its interaction with `Wearing Position`, and `Sample` are not supported by the data. The resulting model `m5` is used for the following analysis.
+
+#### Significant differences
+
+```{r, public differences}
+#final model
+chosen_model <- "m5"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model)
+
+P2 <- Significance_matrix(sig_matrix)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P2, width = 4, height = 4.7)
+
+P2
+
+```
+
+#### Predicted probabilities
+
+```{r, public predictions}
+#if one wanted to print predictions for different subject percentiles
+stDev <-  as.numeric(attr(VarCorr(Model)$record_id, "stddev"))^2
+# 5th percentile:
+prob_table(Model$beta * qnorm(0.05) * stDev, 
+           "Predicted probabilities for the **5th percentile** for **{parameter}**")
+#average:
+prob_table(Model$beta, 
+           "Predicted probabilities for the **average person** for **{parameter}**")
+# 95th percentile:
+prob_table(Model$beta * qnorm(0.95) * stDev, 
+           "Predicted probabilities for the **95th percentile** for **{parameter}**")
+
+```
+
+#### Model diagnostics
+
+```{r, public diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+for(i in 1:145) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Wearlikelihood work
+
+#### Model selection
+
+```{r, work selection}
+parameter <- "wearlikelihoodrating_work"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The only parameter which is supported by the data is `Wearing Position`. `Sex`, its interaction with `Wearing Position`, and `Sample` are not supported by the data. The resulting model `m5` is used for the following analysis.
+
+#### Significant differences
+
+```{r, work differences}
+#final model
+chosen_model <- "m5"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model)
+
+P3 <- Significance_matrix(sig_matrix)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P3, width = 4, height = 4.7)
+
+P3
+
+```
+
+#### Predicted probabilities
+
+```{r, work predictions}
+#if one wanted to print predictions for different subject percentiles
+stDev <-  as.numeric(attr(VarCorr(Model)$record_id, "stddev"))^2
+# 5th percentile:
+prob_table(Model$beta * qnorm(0.05) * stDev, 
+           "Predicted probabilities for the **5th percentile** for **{parameter}**")
+#average:
+prob_table(Model$beta, 
+           "Predicted probabilities for the **average person** for **{parameter}**")
+# 95th percentile:
+prob_table(Model$beta * qnorm(0.95) * stDev, 
+           "Predicted probabilities for the **95th percentile** for **{parameter}**")
+
+```
+
+#### Model diagnostics
+
+```{r, work diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+for(i in 1:145) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Wearlikelihood home
+
+#### Model selection
+
+```{r, home selection}
+parameter <- "wearlikelihoodrating_home"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The only parameter which is supported by the data is `Wearing Position`. `Sex`, its interaction with `Wearing Position`, and `Sample` are not supported by the data. The resulting model `m5` is used for the following analysis.
+
+#### Significant differences
+
+```{r, home differences}
+#final model
+chosen_model <- "m5"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model)
+
+P4 <- Significance_matrix(sig_matrix)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P4, width = 4, height = 4.7)
+
+P4
+
+```
+
+#### Predicted probabilities
+
+```{r, home predictions}
+#if one wanted to print predictions for different subject percentiles
+stDev <-  as.numeric(attr(VarCorr(Model)$record_id, "stddev"))^2
+# 5th percentile:
+prob_table(Model$beta * qnorm(0.05) * stDev, 
+           "Predicted probabilities for the **5th percentile** for **{parameter}**")
+#average:
+prob_table(Model$beta, 
+           "Predicted probabilities for the **average person** for **{parameter}**")
+# 95th percentile:
+prob_table(Model$beta * qnorm(0.95) * stDev, 
+           "Predicted probabilities for the **95th percentile** for **{parameter}**")
+
+```
+
+#### Model diagnostics
+
+```{r, home diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+for(i in 1:145) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Wearlikelihood social
+
+#### Model selection
+
+```{r, social selection}
+parameter <- "wearlikelihoodrating_social"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The data supports `Wearing Position`, and its interaction with `Sex`. `Sample` is not supported by the data. The resulting model `m4` is used for the following analysis.
+
+#### Significant differences
+
+```{r, social differences}
+#final model
+chosen_model <- "m4"
+Model <- Models$model[Models$name == chosen_model][[1]]
+
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model, subset = "true")
+sig_matrix <- 
+  sig_matrix %>% mutate(term = str_remove(term, "demographics_sex"))
+
+
+P5 <- 
+  Significance_matrix(
+sig_matrix %>% filter(!str_detect(term, "Male")), sex = TRUE
+) +
+geom_tile(
+data = sig_matrix %>% filter(str_detect(term,"Male") & different) %>% 
+        mutate(term = str_remove(term, ":Male")), 
+fill = "red")
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P5, width = 4, height = 4.7)
+
+P5 
+
+```
+
+#### Model diagnostics
+
+```{r, social diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:144, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:144, labels=ord.re)
+axis(2)
+for(i in 1:144) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:144, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:144, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Wearlikelihood exercise
+
+#### Model selection
+
+```{r, exercise selection}
+parameter <- "wearlikelihoodrating_exercise"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The only parameter which is supported by the data is `Wearing Position`. `Sex`, its interaction with `Wearing Position`, and `Sample` are not supported by the data. The resulting model `m5` is used for the following analysis.
+
+#### Significant differences
+
+```{r, exercise differences}
+#final model
+chosen_model <- "m5"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model)
+
+P6 <- Significance_matrix(sig_matrix)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P6, width = 4, height = 4.7)
+
+P6
+
+```
+
+#### Predicted probabilities
+
+```{r, exercise predictions}
+#if one wanted to print predictions for different subject percentiles
+stDev <-  as.numeric(attr(VarCorr(Model)$record_id, "stddev"))^2
+# 5th percentile:
+prob_table(Model$beta * qnorm(0.05) * stDev, 
+           "Predicted probabilities for the **5th percentile** for **{parameter}**")
+#average:
+prob_table(Model$beta, 
+           "Predicted probabilities for the **average person** for **{parameter}**")
+# 95th percentile:
+prob_table(Model$beta * qnorm(0.95) * stDev, 
+           "Predicted probabilities for the **95th percentile** for **{parameter}**")
+
+```
+
+#### Model diagnostics
+
+```{r, exercise diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+for(i in 1:145) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Wear duration
+
+#### Model selection
+
+```{r, duration selection}
+parameter <- "wearduration"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The data supports `Wearing Position`, and its interaction with `Sex`. `Sample` is not supported by the data. The resulting model `m4` is used for the following analysis.
+
+#### Significant differences
+
+```{r, duration differences}
+#final model
+chosen_model <- "m4"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model, subset = "true")
+sig_matrix <- 
+  sig_matrix %>% mutate(term = str_remove(term, "demographics_sex"))
+
+
+P7 <- 
+  Significance_matrix(
+sig_matrix %>% filter(!str_detect(term, "Male")), sex = TRUE
+) +
+geom_tile(
+data = sig_matrix %>% filter(str_detect(term,"Male") & different) %>% 
+        mutate(term = str_remove(term, ":Male")), 
+fill = "red")
+
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P7, width = 4, height = 4.7)
+
+P7
+
+```
+
+#### Model diagnostics
+
+```{r, duration diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:144, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:144, labels=ord.re)
+axis(2)
+for(i in 1:144) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:144, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:144, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+
+### Restriction
+
+#### Model selection
+
+```{r, restrict selection}
+parameter <- "restrict"
+parameter_symbol <- sym(parameter)
+
+#model generation
+Models <- Infe(!!parameter_symbol, data_long)
+
+#model comparisons
+Model_Comparisons(Models) %>% 
+  gt(caption = md(glue("Model comparisons for **{parameter}**"))) %>% 
+  fmt_number(decimals = 3)
+
+```
+
+The only parameter which is supported by the data is `Wearing Position`. `Sex`, its interaction with `Wearing Position`, and `Sample` are not supported by the data. The resulting model `m5` is used for the following analysis.
+
+#### Significant differences
+
+```{r, restrict differences}
+#final model
+chosen_model <- "m5"
+Model <- Models$model[Models$name == chosen_model][[1]]
+summary(Model)
+#McFadden
+McFadden(Model, Models$model[[6]])
+
+#Significance matrix
+sig_matrix <- data_significance_matrix(Model)
+
+P8 <- Significance_matrix(sig_matrix)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P8, width = 4, height = 4.7)
+
+P8
+
+```
+
+#### Predicted probabilities
+
+```{r, restrict predictions}
+#if one wanted to print predictions for different subject percentiles
+stDev <-  as.numeric(attr(VarCorr(Model)$record_id, "stddev"))^2
+# 5th percentile:
+prob_table(Model$beta * qnorm(0.05) * stDev, 
+           "Predicted probabilities for the **5th percentile** for **{parameter}**")
+#average:
+prob_table(Model$beta, 
+           "Predicted probabilities for the **average person** for **{parameter}**")
+# 95th percentile:
+prob_table(Model$beta * qnorm(0.95) * stDev, 
+           "Predicted probabilities for the **95th percentile** for **{parameter}**")
+
+```
+
+#### Model diagnostics
+
+```{r, restrict diagnostics}
+#random effect distribution with random effects
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+for(i in 1:145) segments(i, ci[i,1], i, ci[i,2])
+abline(h=0, lty=2)
+
+#without confidence intervals
+ci <- Model$ranef+qnorm(0.975)*sqrt(Model$condVar) %o% c(-1,1)
+ord.re <- order(Model$ranef)
+ci <- ci[order(Model$ranef),]
+plot(1:145, Model$ranef[ord.re], axes=FALSE, ylim=range(ci), xlab="Subject", ylab="Subject difference")
+axis(1, at=1:145, labels=ord.re)
+axis(2)
+abline(h=0, lty=2)
+
+```
+:::
+
+## Summary Graph
+
+```{r}
+a <- theme(plot.margin = margin(5, 10,5,5,"pt"))
+b <- theme(plot.margin = margin(5, 5,5,10,"pt"))
+
+(P1 + a + P2 + b) / (P3 + a + P4 + b) / (P5 + a + P6 + b) / (P7 + a + P8 + b) + 
+  plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 20))
+
+ggsave("output/01_figures/summary_graph_differences.pdf", width = 10, height = 20)
+
+```

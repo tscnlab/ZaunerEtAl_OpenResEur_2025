@@ -1,0 +1,1012 @@
+---
+title: "Survey: Light logger form factor and placement"
+authors: "Johannes Zauner, Anna Biller, Manuel Spitschan"
+format: 
+  html:
+    code-fold: true
+    embed-resources: true
+    code-tools: true
+    toc: true
+---
+
+## Preface
+
+This is the analysis for an online survey to gather information about the acceptability of form factor and placements of light loggers. The survey was conducted using Prolific on three days in 2023, each collecting from a different sample (USA, UK, Worldwide).
+
+**This is the first part of the analysis, focusing on descriptive statistics.**
+
+## Import
+
+We will start off by importing the data and setting factor levels.
+```{r, import}
+#| output: false
+
+#Load Hmisc library
+library(Hmisc)
+library(tidyverse)
+library(gtsummary)
+library(gt)
+library(ggtext)
+library(ggridges)
+library(rlang)
+library(patchwork)
+
+#Read Data
+data=read.csv('data/raw/LightLoggerFormFacto_DATA_2024-02-14_1345.csv')
+
+#Setting Units
+
+#Setting Factors(will create new variable for factors)
+data$consent_01___1.factor = factor(data$consent_01___1,levels=c("0","1"))
+data$consent_02___1.factor = factor(data$consent_02___1,levels=c("0","1"))
+data$participant_information_sheet_informed_consent_complete.factor = factor(data$participant_information_sheet_informed_consent_complete,levels=c("0","1","2"))
+data$demographics_sex.factor = factor(data$demographics_sex,levels=c("1","2","3"))
+data$demographics_gender.factor = factor(data$demographics_gender,levels=c("1","0"))
+data$demographics_language.factor = factor(data$demographics_language,levels=c("1","0"))
+data$demographics_tz.factor = factor(data$demographics_tz,levels=c("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130","131","132","133","134","135","136","137","138","139","140","141","142","143","144","145","146","147","148","149","150","151","152","153","154","155","156","157","158","159","160","161","162","163","164","165","166","167","168","169","170","171","172","173","174","175","176","177","178","179","180","181","182","183","184","185","186","187","188","189","190","191","192","193","194","195","196","197","198","199","200","201","202","203","204","205","206","207","208","209","210","211","212","213","214","215","216","217","218","219","220","221","222","223","224","225","226","227","228","229","230","231","232","233","234","235","236","237","238","239","240","241","242","243","244","245","246","247","248","249","250","251","252","253","254","255","256","257","258","259","260","261","262","263","264","265","266","267","268","269","270","271","272","273","274","275","276","277","278","279","280","281","282","283","284","285","286","287","288","289","290","291","292","293","294","295","296","297","298","299","300","301","302","303","304","305","306","307","308","309","310","311","312","313","314","315","316","317","318","319","320","321","322","323","324","325","326","327","328","329","330","331","332","333","334","335","336","337","338","339","340","341","342","343","344","345","346","347","348","349","350","351","352","353","354","355","356","357","358","359","360","361","362","363","364","365","366","367","368","369","370","371","372","373","374","375","376","377","378","379","380","381","382","383","384","385","386","387","388","389","390","391","392","393","394","395","396","397","398","399","400","401","402","403","404","405","406","407","408","409","410","411","412","413","414","415","416","417","418","419","420","421","422","423","424","425"))
+data$demographics_occupation.factor = factor(data$demographics_occupation,levels=c("1","2","3","4","5","6","7"))
+data$your_demographic_information_complete.factor = factor(data$your_demographic_information_complete,levels=c("0","1","2"))
+data$design_appearance.factor = factor(data$design_appearance,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public.factor = factor(data$design_wearlikelihoodrating_public,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home.factor = factor(data$design_wearlikelihoodrating_home,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work.factor = factor(data$design_wearlikelihoodrating_work,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social.factor = factor(data$design_wearlikelihoodrating_social,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise.factor = factor(data$design_wearlikelihoodrating_exercise,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration.factor = factor(data$design_wearduration,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict.factor = factor(data$design_restrict,levels=c("1","2","3","4","5","6","7"))
+data$template_complete.factor = factor(data$template_complete,levels=c("0","1","2"))
+data$design_appearance_wrist.factor = factor(data$design_appearance_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_wrist.factor = factor(data$design_wearlikelihoodrating_public_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_wrist.factor = factor(data$design_wearlikelihoodrating_home_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_wrist.factor = factor(data$design_wearlikelihoodrating_work_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_wrist.factor = factor(data$design_wearlikelihoodrating_social_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_wrist.factor = factor(data$design_wearlikelihoodrating_exercise_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_wrist.factor = factor(data$design_wearduration_wrist,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_wrist.factor = factor(data$design_restrict_wrist,levels=c("1","2","3","4","5","6","7"))
+data$wrist_complete.factor = factor(data$wrist_complete,levels=c("0","1","2"))
+data$design_appearance_collarpin.factor = factor(data$design_appearance_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_collarpin.factor = factor(data$design_wearlikelihoodrating_public_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_collarpin.factor = factor(data$design_wearlikelihoodrating_home_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_collarpin.factor = factor(data$design_wearlikelihoodrating_work_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_collarpin.factor = factor(data$design_wearlikelihoodrating_social_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_collarpin.factor = factor(data$design_wearlikelihoodrating_exercise_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_collarpin.factor = factor(data$design_wearduration_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_collarpin.factor = factor(data$design_restrict_collarpin,levels=c("1","2","3","4","5","6","7"))
+data$collar_pin_complete.factor = factor(data$collar_pin_complete,levels=c("0","1","2"))
+data$design_appearance_glasses.factor = factor(data$design_appearance_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_glasses.factor = factor(data$design_wearlikelihoodrating_public_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_glasses.factor = factor(data$design_wearlikelihoodrating_home_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_glasses.factor = factor(data$design_wearlikelihoodrating_work_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_glasses.factor = factor(data$design_wearlikelihoodrating_social_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_glasses.factor = factor(data$design_wearlikelihoodrating_exercise_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_glasses.factor = factor(data$design_wearduration_glasses,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_glasses.factor = factor(data$design_restrict_glasses,levels=c("1","2","3","4","5","6","7"))
+data$glasses_complete.factor = factor(data$glasses_complete,levels=c("0","1","2"))
+data$design_appearance_glasses_hatpin.factor = factor(data$design_appearance_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_glasses_hatpin.factor = factor(data$design_wearlikelihoodrating_public_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$attentioncheck_03.factor = factor(data$attentioncheck_03,levels=c("1","2","3","4","5"))
+data$design_wearlikelihoodrating_home_glasses_hatpin.factor = factor(data$design_wearlikelihoodrating_home_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_glasses_hatpin.factor = factor(data$design_wearlikelihoodrating_work_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_glasses_hatpin.factor = factor(data$design_wearlikelihoodrating_social_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_glasses_hatpin.factor = factor(data$design_wearlikelihoodrating_exercise_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_glasses_hatpin.factor = factor(data$design_wearduration_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_glasses_hatpin.factor = factor(data$design_restrict_glasses_hatpin,levels=c("1","2","3","4","5","6","7"))
+data$hat_pin_complete.factor = factor(data$hat_pin_complete,levels=c("0","1","2"))
+data$design_appearance_neckloop.factor = factor(data$design_appearance_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_neckloop.factor = factor(data$design_wearlikelihoodrating_public_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_neckloop.factor = factor(data$design_wearlikelihoodrating_home_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_neckloop.factor = factor(data$design_wearlikelihoodrating_work_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_neckloop.factor = factor(data$design_wearlikelihoodrating_social_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_neckloop.factor = factor(data$design_wearlikelihoodrating_exercise_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_neckloop.factor = factor(data$design_wearduration_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_neckloop.factor = factor(data$design_restrict_neckloop,levels=c("1","2","3","4","5","6","7"))
+data$neck_loop_complete.factor = factor(data$neck_loop_complete,levels=c("0","1","2"))
+data$design_appearance_chestpin.factor = factor(data$design_appearance_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_chestpin.factor = factor(data$design_wearlikelihoodrating_public_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_chestpin.factor = factor(data$design_wearlikelihoodrating_home_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_chestpin.factor = factor(data$design_wearlikelihoodrating_work_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_chestpin.factor = factor(data$design_wearlikelihoodrating_social_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_chestpin.factor = factor(data$design_wearlikelihoodrating_exercise_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_chestpin.factor = factor(data$design_wearduration_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_chestpin.factor = factor(data$design_restrict_chestpin,levels=c("1","2","3","4","5","6","7"))
+data$chest_pin_complete.factor = factor(data$chest_pin_complete,levels=c("0","1","2"))
+data$design_appearance_necklace.factor = factor(data$design_appearance_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_necklace.factor = factor(data$design_wearlikelihoodrating_public_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_necklace.factor = factor(data$design_wearlikelihoodrating_home_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_necklace.factor = factor(data$design_wearlikelihoodrating_work_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_necklace.factor = factor(data$design_wearlikelihoodrating_social_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_necklace.factor = factor(data$design_wearlikelihoodrating_exercise_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_necklace.factor = factor(data$design_wearduration_necklace,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_necklace.factor = factor(data$design_restrict_necklace,levels=c("1","2","3","4","5","6","7"))
+data$necklace_complete.factor = factor(data$necklace_complete,levels=c("0","1","2"))
+data$design_appearance_sleevecollar.factor = factor(data$design_appearance_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_public_sleevecollar.factor = factor(data$design_wearlikelihoodrating_public_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_home_sleevecollar.factor = factor(data$design_wearlikelihoodrating_home_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_work_sleevecollar.factor = factor(data$design_wearlikelihoodrating_work_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_social_sleevecollar.factor = factor(data$design_wearlikelihoodrating_social_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_wearlikelihoodrating_exercise_sleevecollar.factor = factor(data$design_wearlikelihoodrating_exercise_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_wearduration_sleevecollar.factor = factor(data$design_wearduration_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$design_restrict_sleevecollar.factor = factor(data$design_restrict_sleevecollar,levels=c("1","2","3","4","5","6","7"))
+data$sleeve_collar_complete.factor = factor(data$sleeve_collar_complete,levels=c("0","1","2"))
+data$other_designs_complete.factor = factor(data$other_designs_complete,levels=c("0","1","2"))
+data$completion_screen_complete.factor = factor(data$completion_screen_complete,levels=c("0","1","2"))
+
+levels(data$consent_01___1.factor)=c("Unchecked","Checked")
+levels(data$consent_02___1.factor)=c("Unchecked","Checked")
+levels(data$participant_information_sheet_informed_consent_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$demographics_sex.factor)=c("Female","Male","Other")
+levels(data$demographics_gender.factor)=c("Yes","No")
+levels(data$demographics_language.factor)=c("Yes","No")
+levels(data$demographics_occupation.factor)=c("In education","In training","Part-time working","Full-time working","Employed but not currently working","Retired","Unemployed")
+levels(data$your_demographic_information_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$template_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_wrist.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_wrist.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_wrist.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$wrist_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_collarpin.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_collarpin.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_collarpin.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$collar_pin_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_glasses.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_glasses.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_glasses.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$glasses_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_glasses_hatpin.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$attentioncheck_03.factor)=c("Never","Rarely","Sometimes","Often","Always")
+levels(data$design_wearlikelihoodrating_home_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_glasses_hatpin.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_glasses_hatpin.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$hat_pin_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_neckloop.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_neckloop.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_neckloop.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$neck_loop_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_chestpin.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_chestpin.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_chestpin.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$chest_pin_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_necklace.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_necklace.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_necklace.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$necklace_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$design_appearance_sleevecollar.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
+levels(data$design_wearlikelihoodrating_public_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearduration_sleevecollar.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
+levels(data$design_restrict_sleevecollar.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
+levels(data$sleeve_collar_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$other_designs_complete.factor)=c("Incomplete","Unverified","Complete")
+levels(data$completion_screen_complete.factor)=c("Incomplete","Unverified","Complete")
+
+tzs <- 
+  c(
+    "Aland Islands - Europe/Mariehamn (UTC +02:00)",
+    "Afghanistan - Asia/Kabul (UTC +04:30)",
+    "Albania - Europe/Tirane (UTC +01:00)",
+    "Algeria - Africa/Algiers (UTC +01:00)",
+    "American Samoa - Pacific/Pago_Pago (UTC -11:00)",
+    "Andorra - Europe/Andorra (UTC +01:00)",
+    "Angola - Africa/Luanda (UTC +01:00)",
+    "Anguilla - America/Anguilla (UTC -04:00)",
+    "Antarctica - Antarctica/Casey (UTC +11:00)",
+    "Antarctica - Antarctica/Davis (UTC +07:00)",
+    "Antarctica - Antarctica/DumontDUrville (UTC +10:00)",
+    "Antarctica - Antarctica/Mawson (UTC +05:00)",
+    "Antarctica - Antarctica/McMurdo (UTC +13:00)",
+    "Antarctica - Antarctica/Palmer (UTC -03:00)",
+    "Antarctica - Antarctica/Rothera (UTC -03:00)",
+    "Antarctica - Antarctica/Syowa (UTC +03:00)",
+    "Antarctica - Antarctica/Troll (UTC)",
+    "Antarctica - Antarctica/Vostok (UTC +06:00)","Antigua and Barbuda - America/Antigua (UTC -04:00)","Argentina - America/Argentina/Buenos_Aires (UTC -03:00)","Argentina - America/Argentina/Catamarca (UTC -03:00)","Argentina - America/Argentina/Cordoba (UTC -03:00)","Argentina - America/Argentina/Jujuy (UTC -03:00)","Argentina - America/Argentina/La_Rioja (UTC -03:00)","Argentina - America/Argentina/Mendoza (UTC -03:00)","Argentina - America/Argentina/Rio_Gallegos (UTC -03:00)","Argentina - America/Argentina/Salta (UTC -03:00)","Argentina - America/Argentina/San_Juan (UTC -03:00)","Argentina - America/Argentina/San_Luis (UTC -03:00)","Argentina - America/Argentina/Tucuman (UTC -03:00)","Argentina - America/Argentina/Ushuaia (UTC -03:00)","Armenia - Asia/Yerevan (UTC +04:00)","Aruba - America/Aruba (UTC -04:00)","Australia - Antarctica/Macquarie (UTC +11:00)","Australia - Australia/Adelaide (UTC +10:30)","Australia - Australia/Brisbane (UTC +10:00)","Australia - Australia/Broken_Hill (UTC +10:30)","Australia - Australia/Currie (UTC +11:00)","Australia - Australia/Darwin (UTC +09:30)","Australia - Australia/Eucla (UTC +08:45)","Australia - Australia/Hobart (UTC +11:00)","Australia - Australia/Lindeman (UTC +10:00)","Australia - Australia/Lord_Howe (UTC +11:00)","Australia - Australia/Melbourne (UTC +11:00)","Australia - Australia/Perth (UTC +08:00)","Australia - Australia/Sydney (UTC +11:00)","Austria - Europe/Vienna (UTC +01:00)","Azerbaijan - Asia/Baku (UTC +04:00)","Bahamas - America/Nassau (UTC -04:00)","Bahrain - Asia/Bahrain (UTC +03:00)","Bangladesh - Asia/Dhaka (UTC +06:00)","Barbados - America/Barbados (UTC -04:00)","Belarus - Europe/Minsk (UTC +03:00)","Belgium - Europe/Brussels (UTC +01:00)","Belize - America/Belize (UTC -06:00)","Benin - Africa/Porto-Novo (UTC +01:00)","Bermuda - Atlantic/Bermuda (UTC -03:00)","Bhutan - Asia/Thimphu (UTC +06:00),Plurinational State of - America/La_Paz (UTC -04:00)","Bolivia,Sint Eustatius and Saba - America/Kralendijk (UTC -04:00)","Bonaire","Bosnia and Herzegovina - Europe/Sarajevo (UTC +01:00)","Botswana - Africa/Gaborone (UTC +02:00)","Brazil - America/Araguaina (UTC -03:00)","Brazil - America/Bahia (UTC -03:00)","Brazil - America/Belem (UTC -03:00)","Brazil - America/Boa_Vista (UTC -04:00)","Brazil - America/Campo_Grande (UTC -04:00)","Brazil - America/Cuiaba (UTC -04:00)","Brazil - America/Eirunepe (UTC -05:00)","Brazil - America/Fortaleza (UTC -03:00)","Brazil - America/Maceio (UTC -03:00)","Brazil - America/Manaus (UTC -04:00)","Brazil - America/Noronha (UTC -02:00)","Brazil - America/Porto_Velho (UTC -04:00)","Brazil - America/Recife (UTC -03:00)","Brazil - America/Rio_Branco (UTC -05:00)","Brazil - America/Santarem (UTC -03:00)","Brazil - America/Sao_Paulo (UTC -03:00)","British Indian Ocean Territory - Indian/Chagos (UTC +06:00)","Brunei Darussalam - Asia/Brunei (UTC +08:00)","Bulgaria - Europe/Sofia (UTC +02:00)","Burkina Faso - Africa/Ouagadougou (UTC)","Burundi - Africa/Bujumbura (UTC +02:00)","Cambodia - Asia/Phnom_Penh (UTC +07:00)",
+    "Cameroon - Africa/Douala (UTC +01:00)","Canada - America/Atikokan (UTC -05:00)","Canada - America/Blanc-Sablon (UTC -04:00)","Canada - America/Cambridge_Bay (UTC -06:00)","Canada - America/Creston (UTC -07:00)","Canada - America/Dawson (UTC -07:00)","Canada - America/Dawson_Creek (UTC -07:00)","Canada - America/Edmonton (UTC -06:00)","Canada - America/Fort_Nelson (UTC -07:00)","Canada - America/Glace_Bay (UTC -03:00)","Canada - America/Goose_Bay (UTC -03:00)","Canada - America/Halifax (UTC -03:00)","Canada - America/Inuvik (UTC -06:00)","Canada - America/Iqaluit (UTC -04:00)","Canada - America/Moncton (UTC -03:00)","Canada - America/Nipigon (UTC -04:00)","Canada - America/Pangnirtung (UTC -04:00)","Canada - America/Rainy_River (UTC -05:00)","Canada - America/Rankin_Inlet (UTC -05:00)","Canada - America/Regina (UTC -06:00)","Canada - America/Resolute (UTC -05:00)","Canada - America/St_Johns (UTC -02:30)","Canada - America/Swift_Current (UTC -06:00)","Canada - America/Thunder_Bay (UTC -04:00)","Canada - America/Toronto (UTC -04:00)","Canada - America/Vancouver (UTC -07:00)","Canada - America/Whitehorse (UTC -07:00)","Canada - America/Winnipeg (UTC -05:00)","Canada - America/Yellowknife (UTC -06:00)","Cape Verde - Atlantic/Cape_Verde (UTC -01:00)","Cayman Islands - America/Cayman (UTC -05:00)","Central African Republic - Africa/Bangui (UTC +01:00)","Chad - Africa/Ndjamena (UTC +01:00)","Chile - America/Punta_Arenas (UTC -03:00)","Chile - America/Santiago (UTC -03:00)","Chile - Pacific/Easter (UTC -05:00)","China - Asia/Shanghai (UTC +08:00)","China - Asia/Urumqi (UTC +06:00)","Christmas Island - Indian/Christmas (UTC +07:00)","Cocos (Keeling) Islands - Indian/Cocos (UTC +06:30)","Colombia - America/Bogota (UTC -05:00)","Comoros - Indian/Comoro (UTC +03:00)","Congo - Africa/Brazzaville (UTC +01:00),the Democratic Republic of the - Africa/Kinshasa (UTC +01:00)","Congo,the Democratic Republic of the - Africa/Lubumbashi (UTC +02:00)","Congo","Cook Islands - Pacific/Rarotonga (UTC -10:00)","Costa Rica - America/Costa_Rica (UTC -06:00)","Croatia - Europe/Zagreb (UTC +01:00)","Cuba - America/Havana (UTC -04:00)","Curaçao - America/Curacao (UTC -04:00)","Cyprus - Asia/Famagusta (UTC +02:00)","Cyprus - Asia/Nicosia (UTC +02:00)","Czech Republic - Europe/Prague (UTC +01:00)","Côte dIvoire - Africa/Abidjan (UTC)","Denmark - Europe/Copenhagen (UTC +01:00)","Djibouti - Africa/Djibouti (UTC +03:00)","Dominica - America/Dominica (UTC -04:00)","Dominican Republic - America/Santo_Domingo (UTC -04:00)","Ecuador - America/Guayaquil (UTC -05:00)","Ecuador - Pacific/Galapagos (UTC -06:00)","Egypt - Africa/Cairo (UTC +02:00)","El Salvador - America/El_Salvador (UTC -06:00)","Equatorial Guinea - Africa/Malabo (UTC +01:00)","Eritrea - Africa/Asmara (UTC +03:00)",
+    "Estonia - Europe/Tallinn (UTC +02:00)","Ethiopia - Africa/Addis_Ababa (UTC +03:00)","Falkland Islands (Malvinas) - Atlantic/Stanley (UTC -03:00)","Faroe Islands - Atlantic/Faroe (UTC)","Fiji - Pacific/Fiji (UTC +12:00)","Finland - Europe/Helsinki (UTC +02:00)","France - Europe/Paris (UTC +01:00)","French Guiana - America/Cayenne (UTC -03:00)","French Polynesia - Pacific/Gambier (UTC -09:00)","French Polynesia - Pacific/Marquesas (UTC -09:30)","French Polynesia - Pacific/Tahiti (UTC -10:00)","French Southern Territories - Indian/Kerguelen (UTC +05:00)","Gabon - Africa/Libreville (UTC +01:00)","Gambia - Africa/Banjul (UTC)","Georgia - Asia/Tbilisi (UTC +04:00)","Germany - Europe/Berlin (UTC +01:00)","Germany - Europe/Busingen (UTC +01:00)","Ghana - Africa/Accra (UTC)","Gibraltar - Europe/Gibraltar (UTC +01:00)","Greece - Europe/Athens (UTC +02:00)","Greenland - America/Danmarkshavn (UTC)","Greenland - America/Nuuk (UTC -03:00)","Greenland - America/Scoresbysund (UTC -01:00)","Greenland - America/Thule (UTC -03:00)","Grenada - America/Grenada (UTC -04:00)","Guadeloupe - America/Guadeloupe (UTC -04:00)","Guam - Pacific/Guam (UTC +10:00)","Guatemala - America/Guatemala (UTC -06:00)","Guernsey - Europe/Guernsey (UTC)","Guinea - Africa/Conakry (UTC)","Guinea-Bissau - Africa/Bissau (UTC)","Guyana - America/Guyana (UTC -04:00)","Haiti - America/Port-au-Prince (UTC -04:00)","Holy See (Vatican City State) - Europe/Vatican (UTC +01:00)","Honduras - America/Tegucigalpa (UTC -06:00)","Hong Kong - Asia/Hong_Kong (UTC +08:00)","Hungary - Europe/Budapest (UTC +01:00)","Iceland - Atlantic/Reykjavik (UTC)","India - Asia/Kolkata (UTC +05:30)","Indonesia - Asia/Jakarta (UTC +07:00)","Indonesia - Asia/Jayapura (UTC +09:00)","Indonesia - Asia/Makassar (UTC +08:00)","Indonesia - Asia/Pontianak (UTC +07:00),Islamic Republic of - Asia/Tehran (UTC +03:30)","Iran","Iraq - Asia/Baghdad (UTC +03:00)","Ireland - Europe/Dublin (UTC)","Isle of Man - Europe/Isle_of_Man (UTC)","Israel - Asia/Jerusalem (UTC +02:00)","Italy - Europe/Rome (UTC +01:00)","Jamaica - America/Jamaica (UTC -05:00)","Japan - Asia/Tokyo (UTC +09:00)","Jersey - Europe/Jersey (UTC)","Jordan - Asia/Amman (UTC +03:00)","Kazakhstan - Asia/Almaty (UTC +06:00)","Kazakhstan - Asia/Aqtau (UTC +05:00)","Kazakhstan - Asia/Aqtobe (UTC +05:00)","Kazakhstan - Asia/Atyrau (UTC +05:00)","Kazakhstan - Asia/Oral (UTC +05:00)","Kazakhstan - Asia/Qostanay (UTC +06:00)","Kazakhstan - Asia/Qyzylorda (UTC +05:00)","Kenya - Africa/Nairobi (UTC +03:00)","Kiribati - Pacific/Enderbury (UTC +13:00)","Kiribati - Pacific/Kiritimati (UTC +14:00)","Kiribati - Pacific/Tarawa (UTC +12:00),Democratic Peoples Republic of - Asia/Pyongyang (UTC +09:00)","Korea,Republic of - Asia/Seoul (UTC +09:00)","Korea","Kuwait - Asia/Kuwait (UTC +03:00)","Kyrgyzstan - Asia/Bishkek (UTC +06:00)","Lao Peoples Democratic Republic - Asia/Vientiane (UTC +07:00)","Latvia - Europe/Riga (UTC +02:00)","Lebanon - Asia/Beirut (UTC +02:00)","Lesotho - Africa/Maseru (UTC +02:00)","Liberia - Africa/Monrovia (UTC)","Libya - Africa/Tripoli (UTC +02:00)","Liechtenstein - Europe/Vaduz (UTC +01:00)",
+    "Lithuania - Europe/Vilnius (UTC +02:00)","Luxembourg - Europe/Luxembourg (UTC +01:00)","Macao - Asia/Macau (UTC +08:00),the Former Yugoslav Republic of - Europe/Skopje (UTC +01:00)","Macedonia","Madagascar - Indian/Antananarivo (UTC +03:00)","Malawi - Africa/Blantyre (UTC +02:00)","Malaysia - Asia/Kuala_Lumpur (UTC +08:00)","Malaysia - Asia/Kuching (UTC +08:00)","Maldives - Indian/Maldives (UTC +05:00)","Mali - Africa/Bamako (UTC)","Malta - Europe/Malta (UTC +01:00)","Marshall Islands - Pacific/Kwajalein (UTC +12:00)","Marshall Islands - Pacific/Majuro (UTC +12:00)","Martinique - America/Martinique (UTC -04:00)","Mauritania - Africa/Nouakchott (UTC)","Mauritius - Indian/Mauritius (UTC +04:00)","Mayotte - Indian/Mayotte (UTC +03:00)","Mexico - America/Bahia_Banderas (UTC -06:00)","Mexico - America/Cancun (UTC -05:00)","Mexico - America/Chihuahua (UTC -07:00)","Mexico - America/Hermosillo (UTC -07:00)","Mexico - America/Matamoros (UTC -05:00)","Mexico - America/Mazatlan (UTC -07:00)","Mexico - America/Merida (UTC -06:00)","Mexico - America/Mexico_City (UTC -06:00)","Mexico - America/Monterrey (UTC -06:00)","Mexico - America/Ojinaga (UTC -06:00)","Mexico - America/Tijuana (UTC -07:00),Federated States of - Pacific/Chuuk (UTC +10:00)","Micronesia,Federated States of - Pacific/Kosrae (UTC +11:00)","Micronesia,Federated States of - Pacific/Pohnpei (UTC +11:00)","Micronesia,Republic of - Europe/Chisinau (UTC +02:00)","Moldova","Monaco - Europe/Monaco (UTC +01:00)","Mongolia - Asia/Choibalsan (UTC +08:00)","Mongolia - Asia/Hovd (UTC +07:00)","Mongolia - Asia/Ulaanbaatar (UTC +08:00)","Montenegro - Europe/Podgorica (UTC +01:00)","Montserrat - America/Montserrat (UTC -04:00)","Morocco - Africa/Casablanca (UTC +01:00)","Mozambique - Africa/Maputo (UTC +02:00)","Myanmar - Asia/Yangon (UTC +06:30)","Namibia - Africa/Windhoek (UTC +02:00)","Nauru - Pacific/Nauru (UTC +12:00)","Nepal - Asia/Kathmandu (UTC +05:45)","Netherlands - Europe/Amsterdam (UTC +01:00)","New Caledonia - Pacific/Noumea (UTC +11:00)","New Zealand - Pacific/Auckland (UTC +13:00)","New Zealand - Pacific/Chatham (UTC +13:45)","Nicaragua - America/Managua (UTC -06:00)","Niger - Africa/Niamey (UTC +01:00)","Nigeria - Africa/Lagos (UTC +01:00)",
+"Niue - Pacific/Niue (UTC -11:00)","Norfolk Island - Pacific/Norfolk (UTC +12:00)","Northern Mariana Islands - Pacific/Saipan (UTC +10:00)","Norway - Europe/Oslo (UTC +01:00)","Oman - Asia/Muscat (UTC +04:00)","Pakistan - Asia/Karachi (UTC +05:00)","Palau - Pacific/Palau (UTC +09:00),State of - Asia/Gaza (UTC +02:00)","Palestine,State of - Asia/Hebron (UTC +02:00)","Palestine","Panama - America/Panama (UTC -05:00)","Papua New Guinea - Pacific/Bougainville (UTC +11:00)","Papua New Guinea - Pacific/Port_Moresby (UTC +10:00)","Paraguay - America/Asuncion (UTC -03:00)","Peru - America/Lima (UTC -05:00)","Philippines - Asia/Manila (UTC +08:00)","Pitcairn - Pacific/Pitcairn (UTC -08:00)","Poland - Europe/Warsaw (UTC +01:00)","Portugal - Atlantic/Azores (UTC -01:00)","Portugal - Atlantic/Madeira (UTC)","Portugal - Europe/Lisbon (UTC)","Puerto Rico - America/Puerto_Rico (UTC -04:00)","Qatar - Asia/Qatar (UTC +03:00)","Romania - Europe/Bucharest (UTC +02:00)","Russian Federation - Asia/Anadyr (UTC +12:00)","Russian Federation - Asia/Barnaul (UTC +07:00)","Russian Federation - Asia/Chita (UTC +09:00)","Russian Federation - Asia/Irkutsk (UTC +08:00)","Russian Federation - Asia/Kamchatka (UTC +12:00)","Russian Federation - Asia/Khandyga (UTC +09:00)","Russian Federation - Asia/Krasnoyarsk (UTC +07:00)","Russian Federation - Asia/Magadan (UTC +11:00)","Russian Federation - Asia/Novokuznetsk (UTC +07:00)","Russian Federation - Asia/Novosibirsk (UTC +07:00)","Russian Federation - Asia/Omsk (UTC +06:00)","Russian Federation - Asia/Sakhalin (UTC +11:00)","Russian Federation - Asia/Srednekolymsk (UTC +11:00)","Russian Federation - Asia/Tomsk (UTC +07:00)","Russian Federation - Asia/Ust-Nera (UTC +10:00)","Russian Federation - Asia/Vladivostok (UTC +10:00)","Russian Federation - Asia/Yakutsk (UTC +09:00)","Russian Federation - Asia/Yekaterinburg (UTC +05:00)","Russian Federation - Europe/Astrakhan (UTC +04:00)","Russian Federation - Europe/Kaliningrad (UTC +02:00)",
+"Russian Federation - Europe/Kirov (UTC +03:00)",
+"Russian Federation - Europe/Moscow (UTC +03:00)","Russian Federation - Europe/Samara (UTC +04:00)","Russian Federation - Europe/Saratov (UTC +04:00)","Russian Federation - Europe/Ulyanovsk (UTC +04:00)","Russian Federation - Europe/Volgograd (UTC +04:00)","Rwanda - Africa/Kigali (UTC +02:00)",
+"Réunion - Indian/Reunion (UTC +04:00)","Saint Barthélemy - America/St_Barthelemy (UTC -04:00),Ascension and Tristan da Cunha - Atlantic/St_Helena (UTC)","Saint Helena","Saint Kitts and Nevis - America/St_Kitts (UTC -04:00)","Saint Lucia - America/St_Lucia (UTC -04:00)","Saint Martin (French part) - America/Marigot (UTC -04:00)","Saint Pierre and Miquelon - America/Miquelon (UTC -02:00)",
+"Saint Vincent and the Grenadines - America/St_Vincent (UTC -04:00)","Samoa - Pacific/Apia (UTC +14:00)","San Marino - Europe/San_Marino (UTC +01:00)","Sao Tome and Principe - Africa/Sao_Tome (UTC)","Saudi Arabia - Asia/Riyadh (UTC +03:00)","Senegal - Africa/Dakar (UTC)","Serbia - Europe/Belgrade (UTC +01:00)","Seychelles - Indian/Mahe (UTC +04:00)","Sierra Leone - Africa/Freetown (UTC)","Singapore - Asia/Singapore (UTC +08:00)","Sint Maarten (Dutch part) - America/Lower_Princes (UTC -04:00)","Slovakia - Europe/Bratislava (UTC +01:00)","Slovenia - Europe/Ljubljana (UTC +01:00)","Solomon Islands - Pacific/Guadalcanal (UTC +11:00)","Somalia - Africa/Mogadishu (UTC +03:00)","South Africa - Africa/Johannesburg (UTC +02:00)","South Georgia and the South Sandwich Islands - Atlantic/South_Georgia (UTC -02:00)","South Sudan - Africa/Juba (UTC +03:00)","Spain - Africa/Ceuta (UTC +01:00)","Spain - Atlantic/Canary (UTC)","Spain - Europe/Madrid (UTC +01:00)","Sri Lanka - Asia/Colombo (UTC +05:30)","Sudan - Africa/Khartoum (UTC +02:00)","Suriname - America/Paramaribo (UTC -03:00)","Svalbard and Jan Mayen - Arctic/Longyearbyen (UTC +01:00)","Swaziland - Africa/Mbabane (UTC +02:00)","Sweden - Europe/Stockholm (UTC +01:00)",
+"Switzerland - Europe/Zurich (UTC +01:00)","Syrian Arab Republic - Asia/Damascus (UTC +03:00),Province of China - Asia/Taipei (UTC +08:00)","Taiwan","Tajikistan - Asia/Dushanbe (UTC +05:00),United Republic of - Africa/Dar_es_Salaam (UTC +03:00)","Tanzania","Thailand - Asia/Bangkok (UTC +07:00)","Timor-Leste - Asia/Dili (UTC +09:00)","Togo - Africa/Lome (UTC)","Tokelau - Pacific/Fakaofo (UTC +13:00)","Tonga - Pacific/Tongatapu (UTC +13:00)","Trinidad and Tobago - America/Port_of_Spain (UTC -04:00)","Tunisia - Africa/Tunis (UTC +01:00)","Turkey - Europe/Istanbul (UTC +03:00)","Turkmenistan - Asia/Ashgabat (UTC +05:00)","Turks and Caicos Islands - America/Grand_Turk (UTC -04:00)","Tuvalu - Pacific/Funafuti (UTC +12:00)","Uganda - Africa/Kampala (UTC +03:00)","Ukraine - Europe/Kiev (UTC +02:00)","Ukraine - Europe/Simferopol (UTC +03:00)","Ukraine - Europe/Uzhgorod (UTC +02:00)","Ukraine - Europe/Zaporozhye (UTC +02:00)","United Arab Emirates - Asia/Dubai (UTC +04:00)",
+"United Kingdom - Europe/London (UTC)","United States - America/Adak (UTC -09:00)","United States - America/Anchorage (UTC -08:00)","United States - America/Boise (UTC -06:00)","United States - America/Chicago (UTC -05:00)","United States - America/Denver (UTC -06:00)","United States - America/Detroit (UTC -04:00)","United States - America/Indiana/Indianapolis (UTC -04:00)","United States - America/Indiana/Knox (UTC -05:00)","United States - America/Indiana/Marengo (UTC -04:00)","United States - America/Indiana/Petersburg (UTC -04:00)","United States - America/Indiana/Tell_City (UTC -05:00)","United States - America/Indiana/Vevay (UTC -04:00)","United States - America/Indiana/Vincennes (UTC -04:00)","United States - America/Indiana/Winamac (UTC -04:00)","United States - America/Juneau (UTC -08:00)","United States - America/Kentucky/Louisville (UTC -04:00)","United States - America/Kentucky/Monticello (UTC -04:00)","United States - America/Los_Angeles (UTC -07:00)","United States - America/Menominee (UTC -05:00)","United States - America/Metlakatla (UTC -08:00)","United States - America/New_York (UTC -04:00)","United States - America/Nome (UTC -08:00)","United States - America/North_Dakota/Beulah (UTC -05:00)","United States - America/North_Dakota/Center (UTC -05:00)","United States - America/North_Dakota/New_Salem (UTC -05:00)","United States - America/Phoenix (UTC -07:00)","United States - America/Sitka (UTC -08:00)","United States - America/Yakutat (UTC -08:00)","United States - Pacific/Honolulu (UTC -10:00)","United States Minor Outlying Islands - Pacific/Midway (UTC -11:00)","United States Minor Outlying Islands - Pacific/Wake (UTC +12:00)","Uruguay - America/Montevideo (UTC -03:00)","Uzbekistan - Asia/Samarkand (UTC +05:00)","Uzbekistan - Asia/Tashkent (UTC +05:00)","Vanuatu - Pacific/Efate (UTC +11:00),Bolivarian Republic of - America/Caracas (UTC -04:00)","Venezuela","Viet Nam - Asia/Ho_Chi_Minh (UTC +07:00),British - America/Tortola (UTC -04:00)","Virgin Islands,U.S. - America/St_Thomas (UTC -04:00)","Virgin Islands","Wallis and Futuna - Pacific/Wallis (UTC +12:00)","Western Sahara - Africa/El_Aaiun (UTC +01:00)","Yemen - Asia/Aden (UTC +03:00)","Zambia - Africa/Lusaka (UTC +02:00)","Zimbabwe - Africa/Harare (UTC +02:00)")
+
+levels(data$demographics_tz.factor) <- tzs
+
+```
+
+### Data preparation
+
+In this section, the raw data gets filtered for complete cases and relevant columns are selected. This will be the basis for the main analysis.
+
+```{r}
+#remove columns which contain "prolific"
+# data %>% select(contains("prolific")) %>% names()
+data <- data %>% select(-contains("prolific"))
+
+#remove unneeded columns
+data <- 
+  data %>% 
+  select(-redcap_survey_identifier, 
+         -(template_timestamp:template_complete), 
+         -(design_appearance.factor:template_complete.factor)
+         )
+
+#include only rows where a participant gave consent
+data <- 
+  data %>% 
+  filter(consent_01___1.factor == "Checked" &
+         consent_02___1.factor == "Checked" )
+
+#include only rows where the attention checks were positive
+attention_checks <- data %>% select(contains("attention")) %>% label()
+attention_answers <- c(9, 19, 4) %>% set_names(names(attention_checks)[-4])
+
+data <- data %>% 
+  dplyr::filter(!!sym(names(attention_answers[1])) == attention_answers[1],
+                !!sym(names(attention_answers[2])) == attention_answers[2],
+                !!sym(names(attention_answers[3])) == attention_answers[3]
+                )
+
+#include only rows where the participants completed the section
+data <- 
+  data %>% 
+  filter(if_all(ends_with("complete") & !completion_screen_complete, ~ .x == 2))
+
+#remove empty text across all fields
+# data <-
+#   data %>% 
+#     mutate(across(everything(), ~ ifelse(.x == "", NA, .x)))
+
+#add a column for the survey locations
+data <- 
+data %>% 
+  mutate(sample_location = day(wrist_timestamp), .before = 1,
+         sample_location = case_match(sample_location,
+           9 ~ "USA",
+           11 ~ "UK",
+           12 ~ "Worldwide",
+         ))
+
+#remove timestamp columns
+data <- 
+  data %>% 
+  select(-contains("timestamp"),
+         -completion_screen_complete)
+
+#remove consent columns
+data <- 
+  data %>% 
+  select(-contains("consent"))
+
+#remove complete columns
+data <- 
+  data %>% 
+  select(-contains("complete"))
+
+#get all the columns that end in ".factor" and replace the same columns without the ".factor" suffix
+factor_columns <- data %>% select(ends_with(".factor")) %>% names()
+column_order <- data %>% names()
+
+data <- 
+  data %>% 
+  select(
+    -(contains(str_remove(factor_columns, ".factor")) & 
+      !ends_with(".factor") &
+      !demographics_gender_text
+      )
+    ) %>% 
+  rename_with(~ str_remove(., ".factor"), contains(".factor")) %>% 
+    dplyr::select(any_of(column_order))
+
+#get all the columns that contain glasses_hatpin and remove the glasses part
+data <- 
+  data %>% 
+  rename_with(~ str_remove(., "glasses_"), contains("glasses_hatpin"))
+
+#remove the attention check columns
+data <- 
+data %>% 
+  select(-contains("attention"))
+
+```
+
+In the next code sections labels for all the factors get set, and formatted into the `long format`.
+
+```{r}
+#labeling the data
+#Setting Labels
+
+label(data$record_id)="Record ID"
+label(data$demographics_age)="What is your age in years?"
+label(data$demographics_sex)="What is your sex? If youre not sure how to answer, use the sex registered on your official documents, such as passport or driving licence, or whichever answer best describes your sex."
+label(data$demographics_gender)="Is your gender the same as the sex you were registered at birth?If your gender is not the same as the sex recorded on your birth certificate when you were born (for example, you are transgender or non-binary), tick No.If you answered no, please enter the term you use to describe your gender in the following text box."
+label(data$demographics_gender_text)="Please enter your gender:"
+label(data$demographics_language)="Are you a native speaker of English?"
+label(data$demographics_tz)="Please select your country of residence and time zone:"
+label(data$demographics_occupation)="What best describes your current occupational situation? If you are a pupil, student, or similar, tick In education. If you are an apprentice or similar, tick In training. Medical reasons or parental leave can be reasons for being employed but not currently working."
+label(data$design_appearance_wrist)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_wrist)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_wrist)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_wrist)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_wrist)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_wrist)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_wrist)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_wrist)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_wrist)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_wrist)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_collarpin)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_collarpin)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_collarpin)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_collarpin)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_collarpin)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_collarpin)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_collarpin)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_collarpin)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_collarpin)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_collarpin)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_glasses)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_glasses)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_glasses)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_glasses)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_glasses)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_glasses)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_glasses)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_glasses)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_glasses)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_glasses)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_hatpin)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_hatpin)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_hatpin)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_hatpin)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_hatpin)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_hatpin)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_hatpin)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_hatpin)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_hatpin)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_hatpin)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_neckloop)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_neckloop)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_neckloop)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_neckloop)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_neckloop)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_neckloop)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_neckloop)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_neckloop)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_neckloop)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_neckloop)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_chestpin)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_chestpin)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_chestpin)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_chestpin)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_chestpin)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_chestpin)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_chestpin)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_chestpin)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_chestpin)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_chestpin)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_necklace)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_necklace)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_necklace)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_necklace)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_necklace)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_necklace)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_necklace)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_necklace)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_necklace)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_necklace)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_appearance_sleevecollar)="How attractive do you find the overall design and look of this light logger?"
+label(data$design_wearlikelihoodrating_public_sleevecollar)="What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data$design_wearlikelihoodrating_home_sleevecollar)="What is the likelihood that you would choose to wear this light logger at home?"
+label(data$design_wearlikelihoodrating_work_sleevecollar)="What is the likelihood that you would choose to wear this light logger at work?"
+label(data$design_wearlikelihoodrating_social_sleevecollar)="What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data$design_wearlikelihoodrating_exercise_sleevecollar)="What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data$design_wearduration_sleevecollar)="How many hours could you imagine yourself wearing the light logger during the day?"
+label(data$design_restrict_sleevecollar)="To what extent do you believe the light sensor would restrict your daily activities?"
+label(data$design_difficulty_sleevecollar)="In what situations or activities do you think wearing the light logger might be difficult?"
+label(data$design_check_sleevecollar)="Please describe, in your own words, the placement of the light logger in the body."
+label(data$design_openended)="Can you envision and elaborate on alternative designs for light loggers, specifically focused on enabling continuous wear?"
+label(data$design_feedback)="Do you have any other comments on this survey?"
+```
+
+```{r}
+#removing unnecessary elements
+rm(tzs, factor_columns, column_order, attention_checks, attention_answers)
+```
+
+```{r}
+#removing elements that are not processable as factors
+data_factors <- 
+  data %>% 
+  select(sample_location, record_id, where(is.factor))
+
+#defining a regex pattern used to restructure the data
+regex_pattern <- 
+  "design_(.+)_(wrist|collarpin|glasses|hatpin|neckloop|chestpin|necklace|sleevecollar)"
+
+#restructuring the data
+data_long <- 
+data_factors %>%
+  pivot_longer(
+    cols = starts_with("design_"), 
+    names_pattern = regex_pattern,
+    names_to = c(".value", "wearing_position")
+    )
+
+#adding back labels
+
+label(data_long$appearance)=
+  "How attractive do you find the overall design and look of this light logger?"
+label(data_long$wearlikelihoodrating_public)=
+  "What is the likelihood that you would choose to wear this light logger in a public setting?"
+label(data_long$wearlikelihoodrating_home)=
+  "What is the likelihood that you would choose to wear this light logger at home?"
+label(data_long$wearlikelihoodrating_work)=
+  "What is the likelihood that you would choose to wear this light logger at work?"
+label(data_long$wearlikelihoodrating_social)=
+  "What is the likelihood that you would choose to wear this light logger in social contexts?"
+label(data_long$wearlikelihoodrating_exercise)=
+  "What is the likelihood that you would choose to wear this light logger during exercise?"
+label(data_long$wearduration)=
+  "How many hours could you imagine yourself wearing the light logger during the day?"
+label(data_long$restrict)=
+  "To what extent do you believe the light sensor would restrict your daily activities?"
+
+#rename the wearing position label
+data_long$wearing_position <- 
+  recode_factor(data_long$wearing_position,
+                "wrist" = "Wrist",
+                "collarpin" = "Collar pin",
+                "glasses" = "Glasses",
+                "hatpin" = "Hat pin",
+                "neckloop" = "Neck loop",
+                "chestpin" = "Chest pin",
+                "necklace" = "Necklace",
+                "sleevecollar" = "Sleeve collar")
+
+```
+
+## Descriptive statistics
+
+### Demographics
+
+In this section all the demographic information is summarized. The summary is split by the sample location. The summary includes the median, minimum and maximum for the continuous variables and the proportion for the categorical variables. 
+
+```{r}
+
+#summary table for demographics dependent on sample
+demographics_sample <- 
+data %>% 
+  select(1,3,4,7,9) %>%
+  mutate(demographics_occupation = 
+          fct_lump_prop(demographics_occupation, 0.1, other_level = "Rest")) %>% 
+tbl_summary(by = sample_location,
+            label = list(
+              sample_location = "Sample",
+              demographics_age = "Age (yrs)",
+              demographics_sex = "Sex",
+              demographics_language = "Native English speaker",
+              demographics_occupation = "Occupation"
+              ),
+            statistic = list(all_continuous() ~ "{median} ({min}-{max})")
+            ) %>% 
+    bold_labels %>% 
+  modify_header(label ~ "**Demographics**")
+
+demographics_sample
+
+gtsave(demographics_sample %>% 
+         as_gt, "demographics_sample.png", path = "output/04_unused/")
+
+demographics_overall <- 
+data %>% 
+  select(1,3,4,7,9) %>% 
+  mutate(demographics_occupation = 
+         fct_lump_prop(demographics_occupation, 0.1, other_level = "Rest")) %>% 
+tbl_summary(
+            label = list(
+              sample_location = "Sample",
+              demographics_age = "Age (yrs)",
+              demographics_sex = "Sex",
+              demographics_language = "Native English speaker",
+              demographics_occupation = "Occupation"
+              ),
+            statistic = list(all_continuous() ~ "{median} ({min}-{max})")
+            ) %>% 
+  bold_labels %>% 
+  modify_header(label ~ "**Demographics**")
+
+demographics_overall
+
+gtsave(demographics_overall %>% 
+         as_gt, "demographics_overall.png", path = "output/04_unused/")
+
+```
+
+```{r}
+#combined table
+demographics_combined <- 
+demographics_sample %>% 
+  add_overall() %>% 
+  modify_spanning_header(
+    c("stat_1", "stat_2", "stat_3") ~ "**Sample locations**"
+    )
+  
+gtsave(
+  demographics_combined %>% as_gt, 
+  "table1_demographics_combined.png", path = "output/02_tables/")
+
+```
+
+```{r}
+# extract the countrynames from the tz data
+data_country <- 
+  data %>% 
+  mutate(country = str_extract(demographics_tz, "^(.*) - ", group = 1)) %>%
+  select(sample_location, record_id, country)
+
+country_table <- 
+data_country %>% 
+  select(country) %>% 
+  mutate(country = fct_reorder(country, country, .fun = ~-length(.x))) %>% 
+tbl_summary(
+            label = list(
+              country = "Country"
+              )
+            ) %>% 
+  bold_labels %>% 
+  modify_header(label ~ "**Countries**") %>% 
+  gtsummary::remove_row_type(country, type = "header")
+
+country_table 
+
+gtsave(country_table %>% as_gt, "country_table.png", 
+       path = "output/03_supplemental/")
+
+```
+
+```{r}
+data_country <- 
+  data_country %>% 
+  count(country, sort = TRUE)
+
+library(rnaturalearth)
+library(rnaturalearthdata)
+
+# Get world map data
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Merge world map data with country counts
+world_data <- merge(world, data_country, by.x = "name", by.y = "country", all.x = TRUE)
+
+# Replace NA with 0 for countries not mentioned in your tibble
+world_data$n[is.na(world_data$n)] <- 0
+
+# Plot
+ggplot(data = world_data) +
+  geom_sf(aes(fill = n), color = "white") +
+  scale_fill_binned(trans = "log10", name = "Count") +
+  # scale_fill_viridis_b(trans = "log10", name = "Count", begin = 0.1, end = 0.7) +
+  labs(x = "", y = "") +
+  theme_void()
+
+ggsave("country_map.pdf", path = "output/04_unused", width = 10, height = 5, units = "in")
+```
+
+### Study results: tabular
+
+The next sections deals with collecting study results in tabular form. As this is quite a lot information it will only be part of the supplemental material
+
+```{r}
+#summary table for design feedback
+design_feedback_tbl <- 
+data_long %>% 
+  select(-(1:7)) %>%
+  tbl_summary(by = wearing_position) %>% 
+  modify_header(all_stat_cols() ~ "**{level}**") %>% 
+  bold_labels
+
+
+design_feedback_tbl_gt <- 
+design_feedback_tbl %>% 
+  as_gt() %>% 
+  gt::cols_width(
+    label ~ px(300),
+    everything() ~ px(102)) %>% 
+  cols_label(
+    label ~ md("**Item** (all N = 145)")
+  )
+
+design_feedback_tbl_gt
+
+gtsave(design_feedback_tbl_gt, 
+       "design_feedback_tbl.png", 
+       path = "output/03_supplemental",
+       vwidth = 3000)
+
+```
+
+### Study results: graphical
+
+The next sections deals with collecting study results in graphical form. Most of these graphics are just intermediaries showing partial information and are not used in the publication.
+
+```{r}
+#define labels
+names_ratings <- 
+  c("appearance", 
+    "wearlikelihoodrating_home",
+    "wearlikelihoodrating_work",
+            "wearlikelihoodrating_public",
+            "wearlikelihoodrating_social",
+            "wearlikelihoodrating_exercise",
+            "wearduration",
+            "restrict"
+            )
+
+label_type1 <- 
+  levels(data_long$appearance)
+
+label_type2 <- 
+  levels(data_long$wearlikelihoodrating_public)
+
+label_type3 <- 
+  levels(data_long$wearduration)
+
+#reverse the restrict factor, so that higher is better
+data_long$restrict <-  data_long$restrict %>% fct_rev()
+
+label_type4 <- 
+  levels(data_long$restrict)
+
+#calculate the average rating for each wearing position
+wearing_position_labels <- 
+  data_long %>% 
+  group_by(wearing_position) %>% 
+  summarise(across(all_of(names_ratings), \(x) mean(as.numeric(x)))) %>% 
+  mutate(mean = rowMeans(across(all_of(names_ratings)))) %>% 
+  arrange(mean) %>% 
+  pull(wearing_position) %>% rev()
+
+data_long$wearing_position <-  
+  data_long$wearing_position %>% factor(levels = wearing_position_labels)
+
+summary_data <- 
+data_long %>% 
+  group_by(wearing_position) %>% 
+  summarise(across(all_of(names_ratings), \(x) mean(as.numeric(x))))
+
+summary_data2 <- 
+data_long %>% 
+  group_by(sample_location, wearing_position) %>% 
+  summarise(across(all_of(names_ratings), \(x) mean(as.numeric(x))))
+```
+
+```{r}
+
+#create and test a function for the graphical display of the data
+
+Histostack <- 
+  function(item, 
+           label = TRUE, 
+           factor_levels, 
+           sample_location = FALSE,
+           image_size = 75) {
+
+item_string <- as_string(item)
+item <- sym(item)
+bins <- (levels(data_long[[item_string]]))
+
+data_long %>% 
+  ggplot(aes(x = as.integer(!!item), y = wearing_position)) +
+  list(
+    if(!sample_location) {
+    # geom_density_ridges_gradient(
+    # # )
+    stat_binline(
+      # stat = "binline" ,
+      geom = "density_ridges_gradient",
+      aes(fill = after_stat(x)),
+      bins = length(bins),
+      binwidth = 1,
+      draw_baseline = FALSE,
+      scale = 0.95
+      )
+    }
+    else {
+    stat_binline(aes(col = sample_location),
+    bins = 7, binwidth = 1, draw_baseline = FALSE, scale = 0.95, alpha = 0.2)
+      }
+  )+
+  list(
+    if(!sample_location) {
+    stat_summary(
+                 fun = "mean",
+                 geom = "point",
+                 col = "red",
+                 size = 3)
+    }
+    else {
+    stat_summary(aes(col = sample_location),
+                 fun = "mean",
+                 geom = "point",
+                 # col = ,
+                 size = 3)
+      }
+  )+
+    list(
+    if(!sample_location) {
+    geom_path(
+    data = summary_data, aes(x = !!item, y = wearing_position, group = 1), 
+    col = "red", linetype = 2)
+    }
+    else {
+    # geom_path(
+    # data = summary_data2, aes(x = !!item, y = wearing_position, 
+    #                           group = sample_location,
+    #                           col = sample_location), 
+    # linetype = 2)
+      }
+  )+
+  theme_ridges()+
+  scale_fill_viridis_c() +
+  scale_color_viridis_d() +
+  labs(title = label(data_long[[item_string]]))+
+  guides(fill = "none") +
+  labs(x = NULL, y = NULL, col = "Sample") +
+  scale_x_continuous(breaks = seq_along(bins),
+                     labels = factor_levels)+
+  scale_y_discrete(
+    labels =
+      str_c(
+        "<img src='data/images/wearables_",
+        wearing_position_labels,
+        ".png' width='",
+        ifelse(!sample_location, image_size,60),
+        "' /><br>",
+        (wearing_position_labels)
+        ),
+    position = "right"
+    )+
+  coord_flip(xlim = c(0.75,7.25), ylim = c(1.5, 8.35), clip = "off")+
+  theme(
+        axis.text.y = element_text(vjust = 0.5),
+        axis.text.x.top = if(label) element_markdown(hjust = 0.1) else element_blank()
+        )
+
+}
+
+Histostack("appearance", factor_levels = label_type1, label = FALSE)
+
+Rating_Plots2 <- 
+  map2(names_ratings, 
+       list(label_type1, label_type2, label_type2, label_type2, label_type2,
+            label_type2, label_type3, label_type4), 
+       ~Histostack(.x, factor_levels = .y, label = FALSE))
+
+Full_plot_rating <- 
+  Rating_Plots2 %>% 
+  reduce(`/`)
+
+ggsave("output/04_unused/Full_plot_rating.pdf", 
+       Full_plot_rating, width = 14, height = 16, dpi = 600)
+
+```
+
+
+```{r}
+#plots for the overall ratings
+Rating_Plots <- 
+  map2(names_ratings, 
+       list(label_type1, label_type2, label_type2, label_type2, label_type2,
+            label_type2, label_type3, label_type4), 
+       ~Histostack(.x, factor_levels = .y))
+
+Rating_Plots %>% 
+  walk2(names_ratings, 
+       ~ggsave(
+         paste0(.y, ".pdf"), .x,
+         path = "output/04_unused", width = 10, height = 5, dpi = 600
+         )
+       )
+
+p <- 
+data_long %>% 
+  ggplot(aes(x = 1, y = wearing_position)) +
+      geom_blank()+
+  theme_ridges()+
+  labs(x = NULL)+
+  scale_y_discrete(
+    labels =
+      str_c(
+        "<img src='data/images/wearables_",
+        wearing_position_labels,
+        ".png' width='",
+        100,
+        "' /><br><b>",
+        (wearing_position_labels),
+        "</b>"
+        ),
+    position = "right"
+    )+
+  coord_flip(xlim = c(0.75,7.25), ylim = c(1.5, 8.35), clip = "off")+
+  theme(axis.line.x=element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks=element_blank(),
+          axis.title=element_blank(),
+          panel.grid.minor=element_blank(),
+          panel.grid.major=element_blank(),
+        axis.text.x.top = element_markdown(hjust = 0.1)
+        )
+
+Rating_Plots2 <- 
+  map2(names_ratings, 
+       list(label_type1, label_type2, label_type2, label_type2, label_type2,
+            label_type2, label_type3, label_type4), 
+       ~Histostack(.x, factor_levels = .y, label = FALSE))
+
+Rating_Plots2 <- c(list(p), Rating_Plots2) 
+
+Full_plot_rating <- 
+  Rating_Plots2 %>% 
+  reduce(`/`)
+
+Full_plot_rating2 <- 
+Full_plot_rating + plot_layout(heights = c(0.01, rep(1, 8)))
+
+ggsave("figure1_Ratings.pdf", 
+       Full_plot_rating2,
+       path = "output/01_figures", width = 14, height = 16.5, dpi = 600)
+
+```
+
+
+```{r}
+#ratings by sample
+Rating_Plots_by_sample <- 
+  map2(names_ratings, 
+       list(label_type1, label_type2, label_type2, label_type2, label_type2,
+            label_type2, label_type3, label_type4), 
+       ~Histostack(.x, factor_levels = .y, sample_location = TRUE))
+
+Rating_Plots_by_sample %>% 
+  walk2(names_ratings, 
+       ~ggsave(
+         paste0(.y, "_by_sample.pdf"), .x, 
+         path = "output/04_unused", width = 10, height = 5, dpi = 600
+         )
+       )
+
+Rating_Plots2_by_sample <- 
+  map2(names_ratings, 
+       list(label_type1, label_type2, label_type2, label_type2, label_type2,
+            label_type2, label_type3, label_type4), 
+       ~Histostack(.x, factor_levels = .y, 
+                   label = FALSE, sample_location = TRUE)
+       )
+
+Rating_Plots2_by_sample <- c(list(p), Rating_Plots2_by_sample) 
+
+Full_plot_rating_by_sample <- 
+  Rating_Plots2_by_sample %>% 
+  reduce(`/`)
+
+Full_plot_rating2_by_sample <- 
+Full_plot_rating_by_sample + 
+  plot_layout(heights = c(0.01, rep(1, 8)), guides = "collect")
+
+ggsave("Full_plot_rating_by_sample.pdf", 
+       Full_plot_rating2_by_sample, 
+       path = "output/03_supplemental", width = 14, height = 16.5, dpi = 600)
+
+```
+
+### Overview of averages
+
+The following image is not part of the publication, because it shows too much information at once. 
+
+```{r}
+average_metrics <- 
+  data_long %>% 
+  group_by(wearing_position) %>% 
+  summarise(across(all_of(names_ratings), \(x) mean(as.numeric(x))))
+
+average_plot_rating <- 
+average_metrics %>% pivot_longer(-wearing_position) %>% 
+  mutate(name = case_match(name, 
+                           "appearance" ~ "Attractiveness",
+                           "wearlikelihoodrating_home" ~ "At Home",
+                           "wearlikelihoodrating_exercise" ~ "During exercise",
+                           "wearlikelihoodrating_social" ~ "At social events",
+                           "wearlikelihoodrating_public" ~ "In public",
+                           "wearlikelihoodrating_work" ~ "At Work",
+                           "wearduration" ~ "Wear Duration",
+                           "restrict" ~ "Restrictiveness")) %>% 
+  ggplot()+
+  stat_summary(aes(x = wearing_position, y = value),
+               fun = "mean",
+               geom = "point",
+               col = "red",
+               size = 4)+
+  geom_point(aes(x = wearing_position, y = value, col = name))+
+  geom_path(aes(x=wearing_position, y=value, group = name, col = name))+
+  theme_minimal()+
+  labs(x = NULL, y = "Rating", col = NULL)+
+  scale_color_viridis_d()+
+  scale_y_continuous(breaks = 1:7, labels = c("Worst", rep("", 5), "Best"))+
+  theme(legend.position = "bottom",
+        panel.grid.minor = element_blank(),
+                axis.text.x.top = element_markdown(),
+        plot.margin = margin(10,20,10,10)
+        )+
+  coord_cartesian(ylim = c(1,7), xlim = c(0.9,8.1), expand = FALSE )+
+  scale_x_discrete(
+    position = "top",
+    labels =
+      str_c(
+        "<img src='data/images/wearables_",
+        wearing_position_labels,
+        ".png' width='",
+        60,
+        "' /><br><b>",
+        (wearing_position_labels),
+        "</b>"
+        )
+  )
+
+ggsave("average_plot_rating.pdf", average_plot_rating,
+       path = "output/04_unused",
+       width = 10, height = 5, dpi = 600)
+
+```
+
+### Saving the data
+
+The cleaned data in the `wide format` (wearing positions in columns) is saved. The `long format` (wearing positions in rows) is the basis for the analysis.
+```{r}
+write.csv(data, "data/cleaned/LightLoggerFormFacto_CLEANED_DATA_2024-02-19.csv")
+save(data_long, file = "data/cleaned/LightLoggerFormFacto_Long_CLEANED_DATA_2024-07-02.RData")
+```
