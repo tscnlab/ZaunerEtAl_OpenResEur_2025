@@ -901,6 +901,10 @@ ggsave("figure1_Ratings.pdf",
        Full_plot_rating2,
        path = "output/01_figures", width = 14, height = 16.5, dpi = 600)
 
+ggsave("figure1_Ratings.jpeg", 
+       Full_plot_rating2,
+       path = "output/01_figures", width = 14, height = 16.5, dpi = 300)
+
 ```
 
 
@@ -941,6 +945,10 @@ Full_plot_rating_by_sample +
 ggsave("Full_plot_rating_by_sample.pdf", 
        Full_plot_rating2_by_sample, 
        path = "output/03_supplemental", width = 14, height = 16.5, dpi = 600)
+
+ggsave("Full_plot_rating_by_sample.jpeg", 
+       Full_plot_rating2_by_sample, 
+       path = "output/03_supplemental", width = 14, height = 16.5, dpi = 300)
 
 ```
 

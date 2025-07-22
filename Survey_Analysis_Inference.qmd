@@ -1100,6 +1100,7 @@ b <- theme(plot.margin = margin(5, 5,5,10,"pt"))
 (P1 + a + P2 + b) / (P3 + a + P4 + b) / (P5 + a + P6 + b) / (P7 + a + P8 + b) + 
   plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 20))
 
-ggsave("output/01_figures/summary_graph_differences.pdf", width = 10, height = 20)
+ggsave("output/01_figures/figure2_summary_graph_differences.pdf", width = 10, height = 20)
+ggsave("output/01_figures/figure2_summary_graph_differences.jpeg", width = 10, height = 20, dpi = 300)
 
 ```
