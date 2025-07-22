@@ -33,7 +33,8 @@ library(patchwork)
 
 #Read Data
 data=read.csv('data/raw/LightLoggerFormFacto_DATA_2024-02-14_1345.csv')
-
+data <- 
+data |> mutate(wrist_timestamp = wrist_timestamp |> parse_date_time(orders = "%d%m%y%H%M"))
 #Setting Units
 
 #Setting Factors(will create new variable for factors)
@@ -578,7 +579,7 @@ demographics_sample %>%
   
 gtsave(
   demographics_combined %>% as_gt, 
-  "table1_demographics_combined.png", path = "output/02_tables/")
+  "table_1_demographics_combined.png", path = "output/02_tables/")
 
 ```
 
