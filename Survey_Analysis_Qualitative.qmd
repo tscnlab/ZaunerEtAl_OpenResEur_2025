@@ -165,7 +165,7 @@ data_analysis_long2 |>
 
 ```{r}
 #count the number of answers and save table
-link <- "https://github.com/tscnlab/ZaunerEtAl_ComputHumanBehav_2025/blob/main/data/cleaned/qual_analysis_LLM.txt"
+link <- "https://github.com/tscnlab/ZaunerEtAl_OpenResEur_2025/blob/main/data/cleaned/qual_analysis_LLM.txt"
 
 table <-
 data_analysis_long2 |> 
@@ -182,10 +182,10 @@ data_analysis_long2 |>
   count(overarching_theme_explanation, theme_explanation) |>
   pivot_wider(values_from = n, names_from = design) |> 
   group_by(overarching_theme_short_name = 
-             paste(overarching_theme_short_name, overarching_theme_explanation, sep = ":")
+             paste(overarching_theme_short_name, overarching_theme_explanation, sep = ": ")
            ) |> 
   mutate(overarching_theme_short_name = 
-           ifelse(overarching_theme_short_name == ":N/A", 
+           ifelse(overarching_theme_short_name == ": N/A", 
                   "",
                   overarching_theme_short_name)
          ) |> 
@@ -202,6 +202,7 @@ data_analysis_long2 |>
 table
 
 table |> gtsave("output/02_tables/table_5_thematic.png", vwidth = 1000)
+table |> gtsave("output/02_tables/table_5_thematic.docx", vwidth = 1000)
 
 ```
 

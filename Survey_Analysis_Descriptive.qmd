@@ -17,7 +17,8 @@ This is the analysis for an online survey to gather information about the accept
 
 ## Import
 
-We will start off by importing the data and setting factor levels.
+We will start off by importing the data and setting factor levels. Note that the rating "Very unlikely" was written as "Very Unlikely" in the REDCap survey. It will be changed to the lower case version for consistency with the other ratings.
+
 ```{r, import}
 #| output: false
 
@@ -141,84 +142,84 @@ levels(data$demographics_language.factor)=c("Yes","No")
 levels(data$demographics_occupation.factor)=c("In education","In training","Part-time working","Full-time working","Employed but not currently working","Retired","Unemployed")
 levels(data$your_demographic_information_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$template_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_wrist.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_wrist.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_wrist.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_wrist.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_wrist.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_wrist.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_wrist.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_wrist.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_wrist.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$wrist_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_collarpin.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_collarpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_collarpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_collarpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_collarpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_collarpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_collarpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_collarpin.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_collarpin.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$collar_pin_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_glasses.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_glasses.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_glasses.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_glasses.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_glasses.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_glasses.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_glasses.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_glasses.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_glasses.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$glasses_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_glasses_hatpin.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_glasses_hatpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$attentioncheck_03.factor)=c("Never","Rarely","Sometimes","Often","Always")
-levels(data$design_wearlikelihoodrating_home_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_glasses_hatpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_glasses_hatpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_glasses_hatpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_glasses_hatpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_glasses_hatpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_glasses_hatpin.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_glasses_hatpin.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$hat_pin_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_neckloop.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_neckloop.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_neckloop.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_neckloop.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_neckloop.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_neckloop.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_neckloop.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_neckloop.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_neckloop.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$neck_loop_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_chestpin.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_chestpin.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_chestpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_chestpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_chestpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_chestpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_chestpin.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_chestpin.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_chestpin.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$chest_pin_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_necklace.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_necklace.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_necklace.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_necklace.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_necklace.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_necklace.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_necklace.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_necklace.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_necklace.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$necklace_complete.factor)=c("Incomplete","Unverified","Complete")
 levels(data$design_appearance_sleevecollar.factor)=c("Extremely unattractive","Very unattractive","Unattractive","Neutral","Attractive","Very attractive","Extremely attractive")
-levels(data$design_wearlikelihoodrating_public_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_home_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_work_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_social_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
-levels(data$design_wearlikelihoodrating_exercise_sleevecollar.factor)=c("Extremely unlikely","Very Unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_public_sleevecollar.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_home_sleevecollar.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_work_sleevecollar.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_social_sleevecollar.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
+levels(data$design_wearlikelihoodrating_exercise_sleevecollar.factor)=c("Extremely unlikely","Very unlikely","Unlikely","Neutral","Likely","Very likely","Extremely likely")
 levels(data$design_wearduration_sleevecollar.factor)=c("Not at all","Up to 1 hour","1-3 hours","3-6 hours","6-8 hours","8-12 hours","Throughout the day")
 levels(data$design_restrict_sleevecollar.factor)=c("Not at all","Slightly","Somewhat","Moderately","Quite a bit","Significantly","Extremely")
 levels(data$sleeve_collar_complete.factor)=c("Incomplete","Unverified","Complete")
@@ -543,6 +544,9 @@ demographics_sample
 gtsave(demographics_sample %>% 
          as_gt, "demographics_sample.png", path = "output/04_unused/")
 
+gtsave(demographics_sample %>% 
+         as_gt, "demographics_sample.docx", path = "output/04_unused/")
+
 demographics_overall <- 
 data %>% 
   select(1,3,4,7,9) %>% 
@@ -566,6 +570,9 @@ demographics_overall
 gtsave(demographics_overall %>% 
          as_gt, "demographics_overall.png", path = "output/04_unused/")
 
+gtsave(demographics_overall %>% 
+         as_gt, "demographics_overall.docx", path = "output/04_unused/")
+
 ```
 
 ```{r}
@@ -580,6 +587,10 @@ demographics_sample %>%
 gtsave(
   demographics_combined %>% as_gt, 
   "table_1_demographics_combined.png", path = "output/02_tables/")
+
+gtsave(
+  demographics_combined %>% as_gt, 
+  "table_1_demographics_combined.docx", path = "output/02_tables/")
 
 ```
 
@@ -606,6 +617,9 @@ tbl_summary(
 country_table 
 
 gtsave(country_table %>% as_gt, "country_table.png", 
+       path = "output/03_supplemental/")
+
+gtsave(country_table %>% as_gt, "country_table.docx", 
        path = "output/03_supplemental/")
 
 ```
@@ -666,6 +680,11 @@ design_feedback_tbl_gt
 
 gtsave(design_feedback_tbl_gt, 
        "design_feedback_tbl.png", 
+       path = "output/03_supplemental",
+       vwidth = 3000)
+
+gtsave(design_feedback_tbl_gt, 
+       "design_feedback_tbl.docx", 
        path = "output/03_supplemental",
        vwidth = 3000)
 
@@ -835,6 +854,9 @@ Full_plot_rating <-
 ggsave("output/04_unused/Full_plot_rating.pdf", 
        Full_plot_rating, width = 14, height = 16, dpi = 600)
 
+ggsave("output/04_unused/Full_plot_rating.jpeg", 
+       Full_plot_rating, width = 14, height = 16, dpi = 600)
+
 ```
 
 
@@ -850,6 +872,14 @@ Rating_Plots %>%
   walk2(names_ratings, 
        ~ggsave(
          paste0(.y, ".pdf"), .x,
+         path = "output/04_unused", width = 10, height = 5, dpi = 600
+         )
+       )
+
+Rating_Plots %>% 
+  walk2(names_ratings, 
+       ~ggsave(
+         paste0(.y, ".jpeg"), .x,
          path = "output/04_unused", width = 10, height = 5, dpi = 600
          )
        )

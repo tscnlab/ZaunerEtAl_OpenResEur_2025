@@ -414,6 +414,7 @@ context_preds %>%
 
 context_preds_table
 gtsave(context_preds_table, "output/02_tables/table_2_context.png")
+gtsave(context_preds_table, "output/02_tables/table_2_context.docx")
 
 #get the predicted probabilities depending on wearing_position, save as a table
 context_preds <- pred(Model4$beta, Model4$Theta, 
@@ -437,6 +438,7 @@ context_preds %>%
 
 context_preds_table
 gtsave(context_preds_table, "output/02_tables/table_3_wearing_position.png")
+gtsave(context_preds_table, "output/02_tables/table_3_wearing_position.docx")
 
 #create a table of the interaction model
 #first, collect all the beta coefficients for the context
@@ -514,6 +516,7 @@ pred(coefs_combined, Model$Theta,
 
 combined_pred
 gtsave(combined_pred, "output/02_tables/table_4_context_position.png")
+gtsave(combined_pred, "output/02_tables/table_4_context_position.docx")
 
 
 ```
@@ -557,6 +560,9 @@ sig_matrix <- data_significance_matrix(Model)
 P2 <- Significance_matrix(sig_matrix)
 
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P2, width = 4, height = 4.7)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
        P2, width = 4, height = 4.7)
 
 P2
@@ -642,6 +648,9 @@ P3 <- Significance_matrix(sig_matrix)
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
        P3, width = 4, height = 4.7)
 
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
+       P3, width = 4, height = 4.7)
+
 P3
 
 ```
@@ -723,6 +732,9 @@ sig_matrix <- data_significance_matrix(Model)
 P4 <- Significance_matrix(sig_matrix)
 
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P4, width = 4, height = 4.7)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
        P4, width = 4, height = 4.7)
 
 P4
@@ -819,6 +831,9 @@ fill = "red")
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
        P5, width = 4, height = 4.7)
 
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
+       P5, width = 4, height = 4.7)
+
 P5 
 
 ```
@@ -883,6 +898,9 @@ sig_matrix <- data_significance_matrix(Model)
 P6 <- Significance_matrix(sig_matrix)
 
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P6, width = 4, height = 4.7)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
        P6, width = 4, height = 4.7)
 
 P6
@@ -979,6 +997,9 @@ fill = "red")
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
        P7, width = 4, height = 4.7)
 
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
+       P7, width = 4, height = 4.7)
+
 P7
 
 ```
@@ -1043,6 +1064,9 @@ sig_matrix <- data_significance_matrix(Model)
 P8 <- Significance_matrix(sig_matrix)
 
 ggsave(glue("output/04_unused/significance_matrix_{parameter}.pdf"), 
+       P8, width = 4, height = 4.7)
+
+ggsave(glue("output/04_unused/significance_matrix_{parameter}.jpeg"), 
        P8, width = 4, height = 4.7)
 
 P8
