@@ -16,12 +16,12 @@ version: "1.0.0"
 type: software
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.16050404
+    value: 10.5281/zenodo.16050403
     description: Dataset
   - type: doi
     value: 10.12688/openreseurope.20985.1
     description: Publication in Open Research Europe (V1)
-url: https://doi.org/10.5281/zenodo.16050404
+url: https://doi.org/10.5281/zenodo.16050403
 license: MIT
 keywords:
   - light exposure
