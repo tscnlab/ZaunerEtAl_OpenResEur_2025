@@ -2,7 +2,8 @@
 
 # Zauner\*, Biller\* & Spitschan (2025) Impact of light logger and dosimeter placement on wearability and appeal in real-life settings [Dataset]
 
-This repository contains the analysis of a survey on the usability of light logger wearing positions. The data are analyzed in the publication [Impact of light logger and dosimeter placement on wearability and appeal in real-life settings](https://www.medrxiv.org/content/10.1101/2025.06.13.25329548v1)
+This repository contains the analysis of a survey on the usability of light logger wearing positions. 
+The data are analyzed in the publication [Impact of light logger and dosimeter placement on wearability and appeal in real-life settings](https://doi.org/10.12688/openreseurope.20985.1) under the DOI: 10.12688/openreseurope.20985.1
 
 All necessary information can be found in the `Survey_Analysis_Descriptive.html` and `Survey_Analysis_Inference.html` file and in the `output` folder.
 <img src="https://github.com/tscnlab/Templates/blob/main/logo/logo_with_text-01.png" width="400"/>

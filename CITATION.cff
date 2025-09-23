@@ -14,7 +14,13 @@ authors:
 date-released: 2025-07-17
 version: "1.0.0"
 type: software
-doi: 10.5281/zenodo.16050404
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.16050404
+    description: Dataset
+  - type: doi
+    value: 10.12688/openreseurope.20985.1
+    description: Publication in Open Research Europe (V1)
 url: https://doi.org/10.5281/zenodo.16050404
 license: MIT
 keywords:
